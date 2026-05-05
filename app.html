@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Test Markazi</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f3f4f6;
+    color: #1f2937;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    padding: 18px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 { font-size: 22px; font-weight: 600; cursor: pointer; }
+  header .stats { font-size: 14px; opacity: 0.9; }
+
+  main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+
+  h2 { font-size: 20px; margin-bottom: 16px; color: #111827; }
+  h3 { font-size: 16px; margin-bottom: 12px; color: #374151; }
+
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .action-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-card:hover {
+    border-color: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30,64,175,0.15);
+  }
+  .action-card .icon { font-size: 36px; margin-bottom: 8px; }
+  .action-card h3 { color: #111827; margin: 6px 0; }
+  .action-card p { color: #6b7280; font-size: 13px; }
+  .action-card.disabled { opacity: 0.5; cursor: not-allowed; }
+  .action-card.disabled:hover { transform: none; box-shadow: none; border-color: #e5e7eb; }
+
+  .upload-zone {
+    border: 2px dashed #93c5fd;
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    background: #eff6ff;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .upload-zone:hover { background: #dbeafe; border-color: #1e40af; }
+  .upload-zone.drag { background: #dbeafe; border-color: #1e40af; }
+  .upload-zone .icon { font-size: 42px; margin-bottom: 8px; }
+
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-bar input:focus { border-color: #1e40af; }
+
+  button.btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s, transform 0.05s;
+  }
+  button.btn:hover { opacity: 0.9; }
+  button.btn:active { transform: scale(0.98); }
+  .btn-primary { background: #1e40af; color: white; }
+  .btn-secondary { background: #6b7280; color: white; }
+  .btn-success { background: #059669; color: white; }
+  .btn-danger { background: #dc2626; color: white; }
+  .btn-ghost { background: #f3f4f6; color: #374151; }
+
+  .quiz-question {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .quiz-question h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #111827;
+    line-height: 1.5;
+  }
+  .quiz-options { display: grid; gap: 8px; }
+  .quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .quiz-option:hover { background: #eff6ff; border-color: #93c5fd; }
+  .quiz-option input[type="radio"] { width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
+  .quiz-option.selected { background: #dbeafe; border-color: #1e40af; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; }
+  .quiz-option.wrong { background: #fee2e2; border-color: #dc2626; }
+
+  .progress-bar {
+    background: #e5e7eb;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, #059669, #10b981);
+    height: 100%;
+    transition: width 0.3s;
+  }
+
+  .result-summary {
+    text-align: center;
+    padding: 28px;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .result-summary .score { font-size: 52px; font-weight: 700; margin: 8px 0; }
+  .result-summary .percent { font-size: 24px; opacity: 0.95; }
+
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+
+  .search-result {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .search-result .q-text { font-weight: 500; margin-bottom: 8px; }
+  .search-result .opt-line {
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .search-result .opt-line.correct {
+    background: #d1fae5;
+    color: #065f46;
+    font-weight: 500;
+  }
+
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: #1e40af; font-size: 13px; padding: 4px 0; }
+  details pre {
+    background: #f3f4f6;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    overflow-x: auto;
+    margin-top: 6px;
+    white-space: pre-wrap;
+  }
+
+  mark { background: #fef08a; padding: 0 2px; border-radius: 2px; }
+
+  @media (max-width: 600px) {
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .result-summary .score { font-size: 42px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 onclick="showHome()">📚 Test Markazi</h1>
+  <div class="stats" id="headerStats"></div>
+</header>
+
+<main id="app"></main>
+
+<input type="file" id="fileInput" accept=".txt,.text" style="display:none;" />
+
+<script>
+const STORAGE_KEY = "test_markazi_app_questions_v1";
+
+// ---------- STORAGE ----------
+function loadQuestions() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveQuestions(qs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(qs));
+  updateHeader();
+}
+function updateHeader() {
+  const n = loadQuestions().length;
+  const el = document.getElementById("headerStats");
+  el.innerHTML = n ? `<span class="badge">${n} ta savol bazada</span>` : "";
+}
+
+// ---------- UTILS ----------
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+function highlight(text, q) {
+  if (!q) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, "gi");
+  return escaped.replace(re, "<mark>$1</mark>");
+}
+
+// ---------- PARSER ----------
+// Tries to parse multiple common formats:
+//
+// FORMAT 1 (yulduzcha bilan):
+//   Savol matni?
+//   Variant 1
+//   *To'g'ri variant
+//   Variant 3
+//   Variant 4
+//
+// FORMAT 2 (raqam + harf, oxirida +/* belgi yoki to'g'ri javob):
+//   1. Savol?
+//   A) variant
+//   B) variant *
+//   C) variant
+//   D) variant
+//
+// FORMAT 3 (+ bilan):
+//   Savol?
+//   + To'g'ri javob
+//   - Variant
+//   - Variant
+//   - Variant
+//
+// Bloklar bo'sh qator bilan ajratiladi.
+
+function parseFile(text) {
+  // Normalize line endings
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  // Split into blocks by blank lines
+  const blocks = text.split(/\n\s*\n+/).map(b => b.trim()).filter(Boolean);
+  const questions = [];
+
+  for (const block of blocks) {
+    const parsed = parseBlock(block);
+    if (parsed) questions.push(parsed);
+  }
+  return questions;
+}
+
+function parseBlock(block) {
+  const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+  if (lines.length < 2) return null;
+
+  // First line is the question (strip leading number)
+  let qText = lines[0].replace(/^\d+[\.\):]\s*/, "").trim();
+  if (!qText) return null;
+
+  const optLines = lines.slice(1);
+  const options = [];
+  let correct = -1;
+
+  for (let i = 0; i < optLines.length; i++) {
+    let line = optLines[i];
+    let isCorrect = false;
+
+    // Marker at start: *, +
+    if (/^[\*\+]\s*/.test(line)) {
+      isCorrect = true;
+      line = line.replace(/^[\*\+]\s*/, "");
+    }
+    // Marker at end: *
+    else if (/\s*\*\s*$/.test(line)) {
+      isCorrect = true;
+      line = line.replace(/\s*\*\s*$/, "");
+    }
+    // - prefix means non-correct (just strip)
+    else if (/^-\s*/.test(line)) {
+      line = line.replace(/^-\s*/, "");
+    }
+
+    // Strip A) B) 1) etc.
+    line = line.replace(/^[A-Za-zА-Яа-яЎўҚқҒғҲҳ]\s*[\)\.\:]\s*/, "");
+    line = line.replace(/^\d+\s*[\)\.\:]\s*/, "");
+    line = line.trim();
+
+    if (!line) continue;
+
+    if (isCorrect && correct === -1) correct = options.length;
+    options.push(line);
+  }
+
+  if (options.length < 2) return null;
+  // If no correct marker found, default to first option (warn user later)
+  if (correct === -1) correct = 0;
+
+  // Pad to 4 options if fewer
+  while (options.length < 4) options.push("—");
+  // If more than 4, keep first 4 (rare)
+  const finalOpts = options.slice(0, Math.max(4, options.length));
+
+  return { text: qText, options: finalOpts, correct };
+}
+
+// ---------- HOME ----------
+function showHome() {
+  const qs = loadQuestions();
+  const total = qs.length;
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="card">
+      <h2>📂 Savollar fayli</h2>
+      <div class="upload-zone" id="uploadZone">
+        <div class="icon">📄</div>
+        <div><b>Fayl tanlash yoki shu yerga tashlash</b></div>
+        <div style="color:#6b7280; font-size:13px; margin-top:6px;">.txt fayl — savollar bo'sh qator bilan ajratilgan</div>
+      </div>
+      ${total ? `<p style="margin-top:12px; color:#059669;">✓ Bazada <b>${total}</b> ta savol bor.</p>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="resetToSeed()">↺ Asl savollarni qayta yuklash</button>
+          <button class="btn btn-ghost" onclick="if(confirm('Barcha savollarni o\\'chirasizmi?')){saveQuestions([]);showHome();}">🗑 Bazani tozalash</button>
+        </div>` : ''}
+      <details>
+        <summary>Fayl formatini ko'rish</summary>
+        <pre>1. Savol matni?
+A) Birinchi variant
+B) Ikkinchi variant *
+C) Uchinchi variant
+D) To'rtinchi variant
+
+2. Yana bir savol?
+*To'g'ri javob
+Boshqa variant
+Boshqa variant
+Boshqa variant
+
+3. Uchinchi savol?
++ To'g'ri javob
+- Noto'g'ri
+- Noto'g'ri
+- Noto'g'ri</pre>
+        <div style="margin-top:6px; color:#6b7280; font-size:13px;">
+          To'g'ri javobni belgilash usullari: variant oldida <code>*</code> yoki <code>+</code>, yoki variant oxirida <code>*</code>.
+          Savollar bo'sh qator bilan ajratiladi.
+        </div>
+      </details>
+    </div>
+
+    <div class="actions-grid">
+      <div class="action-card ${total < 30 ? 'disabled' : ''}" onclick="${total >= 30 ? "startQuiz(30)" : ''}">
+        <div class="icon">🎯</div>
+        <h3>30 talik test</h3>
+        <p>${total >= 30 ? "Tasodifiy 30 ta savol" : `Kamida 30 ta savol kerak (hozir ${total})`}</p>
+      </div>
+      <div class="action-card ${total < 50 ? 'disabled' : ''}" onclick="${total >= 50 ? "startQuiz(50)" : ''}">
+        <div class="icon">🏆</div>
+        <h3>50 talik test</h3>
+        <p>${total >= 50 ? "Tasodifiy 50 ta savol" : `Kamida 50 ta savol kerak (hozir ${total})`}</p>
+      </div>
+      <div class="action-card ${total === 0 ? 'disabled' : ''}" onclick="${total > 0 ? "showSearch()" : ''}">
+        <div class="icon">🔍</div>
+        <h3>Savol qidirish</h3>
+        <p>${total > 0 ? "Bazadan savol qidirish" : "Avval savollarni yuklang"}</p>
+      </div>
+    </div>
+  `;
+
+  setupUpload();
+  updateHeader();
+}
+
+function setupUpload() {
+  const zone = document.getElementById("uploadZone");
+  const input = document.getElementById("fileInput");
+  zone.addEventListener("click", () => input.click());
+  input.onchange = e => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+    input.value = "";
+  };
+  zone.addEventListener("dragover", e => { e.preventDefault(); zone.classList.add("drag"); });
+  zone.addEventListener("dragleave", () => zone.classList.remove("drag"));
+  zone.addEventListener("drop", e => {
+    e.preventDefault();
+    zone.classList.remove("drag");
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+}
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const text = ev.target.result;
+    const parsed = parseFile(text);
+    if (!parsed.length) {
+      alert("Fayldan hech qanday savol topilmadi. Format to'g'riligini tekshiring.");
+      return;
+    }
+    const existing = loadQuestions();
+    const choice = existing.length > 0
+      ? confirm(`${parsed.length} ta savol topildi.\n\nMavjud ${existing.length} ta savolga qo'shish uchun OK,\neski bazani almashtirish uchun Bekor qilish bosing.`)
+      : true;
+    if (choice) {
+      saveQuestions([...existing, ...parsed]);
+      alert(`✓ ${parsed.length} ta savol qo'shildi. Jami: ${existing.length + parsed.length}`);
+    } else {
+      saveQuestions(parsed);
+      alert(`✓ Baza yangilandi: ${parsed.length} ta savol.`);
+    }
+    showHome();
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+// ---------- QUIZ ----------
+let quizState = null;
+
+function startQuiz(count) {
+  const all = loadQuestions();
+  if (all.length < count) {
+    alert(`Yetarli savol yo'q. Kerak: ${count}, mavjud: ${all.length}`);
+    return;
+  }
+  const pool = shuffle(all).slice(0, count);
+  quizState = {
+    questions: pool.map(q => {
+      const idxs = shuffle([0, 1, 2, 3].filter(i => i < q.options.length));
+      return {
+        text: q.text,
+        options: idxs.map(i => q.options[i]),
+        correctIndex: idxs.indexOf(q.correct),
+        userAnswer: null
+      };
+    }),
+    startedAt: Date.now(),
+    count: count
+  };
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const app = document.getElementById("app");
+  const answered = quizState.questions.filter(q => q.userAnswer !== null).length;
+  const total = quizState.questions.length;
+  app.innerHTML = `
+    <div class="card">
+      <div class="toolbar">
+        <h2>🎯 ${total} talik test</h2>
+        <span class="badge badge-blue" id="answerBadge">${answered} / ${total} javob berildi</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:${(answered/total)*100}%"></div></div>
+      <div id="quizQs"></div>
+      <div style="display:flex; gap:8px; margin-top:20px; justify-content:space-between; flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="if(confirm('Testni bekor qilasizmi?')) showHome()">← Bekor qilish</button>
+        <button class="btn btn-success" onclick="finishQuiz()">✓ Tugatish</button>
+      </div>
+    </div>
+  `;
+  const qc = document.getElementById("quizQs");
+  qc.innerHTML = quizState.questions.map((q, i) => `
+    <div class="quiz-question" id="qb_${i}">
+      <h4>${i+1}. ${escapeHtml(q.text)}</h4>
+      <div class="quiz-options">
+        ${q.options.map((opt, j) => `
+          <label class="quiz-option ${q.userAnswer === j ? 'selected' : ''}" data-i="${i}" data-j="${j}">
+            <input type="radio" name="q_${i}" ${q.userAnswer === j ? 'checked' : ''} onchange="answerQ(${i}, ${j})" />
+            <span><b>${String.fromCharCode(65+j)}.</b> ${escapeHtml(opt)}</span>
+          </label>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+  window.scrollTo(0, 0);
+}
+
+function answerQ(i, j) {
+  quizState.questions[i].userAnswer = j;
+  const answered = quizState.questions.filter(q => q.userAnswer !== null).length;
+  const total = quizState.questions.length;
+  document.getElementById("progressFill").style.width = `${(answered/total)*100}%`;
+  document.getElementById("answerBadge").textContent = `${answered} / ${total} javob berildi`;
+  const block = document.getElementById(`qb_${i}`);
+  block.querySelectorAll(".quiz-option").forEach((el, k) => {
+    el.classList.toggle("selected", k === j);
+  });
+}
+
+function finishQuiz() {
+  const unanswered = quizState.questions.filter(q => q.userAnswer === null).length;
+  if (unanswered > 0) {
+    if (!confirm(`${unanswered} ta savolga javob bermadingiz. Baribir tugatasizmi?`)) return;
+  }
+  renderResult();
+}
+
+function renderResult() {
+  const total = quizState.questions.length;
+  const correct = quizState.questions.filter(q => q.userAnswer === q.correctIndex).length;
+  const wrong = quizState.questions.filter(q => q.userAnswer !== null && q.userAnswer !== q.correctIndex);
+  const skipped = quizState.questions.filter(q => q.userAnswer === null);
+  const percent = Math.round((correct / total) * 100);
+  const elapsed = Math.round((Date.now() - quizState.startedAt) / 1000);
+  const mins = Math.floor(elapsed / 60), secs = elapsed % 60;
+
+  let grade = "📚 Ko'proq mashq qiling";
+  if (percent >= 90) grade = "🏆 A'lo!";
+  else if (percent >= 75) grade = "🥈 Yaxshi";
+  else if (percent >= 60) grade = "🥉 Qoniqarli";
+
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="card">
+      <div class="result-summary">
+        <div style="font-size:18px;">${grade}</div>
+        <div class="score">${correct} / ${total}</div>
+        <div class="percent">${percent}%</div>
+        <div style="margin-top:10px; opacity:0.9; font-size:14px;">
+          ✓ To'g'ri: ${correct} • ✗ Xato: ${wrong.length} • ⊝ Javobsiz: ${skipped.length} • ⏱ ${mins}:${secs.toString().padStart(2,"0")}
+        </div>
+      </div>
+
+      ${wrong.length || skipped.length ? `<h3>Xato va javobsiz savollar (${wrong.length + skipped.length})</h3>` : `<div class="empty">🎉 Barcha savollarga to'g'ri javob berdingiz!</div>`}
+
+      <div id="reviewList"></div>
+
+      <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="showHome()">← Bosh sahifa</button>
+        <button class="btn btn-success" onclick="startQuiz(${quizState.count})">🔄 Yangi ${quizState.count} talik test</button>
+      </div>
+    </div>
+  `;
+
+  const review = [];
+  quizState.questions.forEach((q, idx) => {
+    if (q.userAnswer !== q.correctIndex) review.push({ q, idx });
+  });
+
+  document.getElementById("reviewList").innerHTML = review.map(({ q, idx }) => `
+    <div class="quiz-question">
+      <h4>${idx+1}. ${escapeHtml(q.text)}</h4>
+      <div class="quiz-options">
+        ${q.options.map((opt, j) => {
+          let cls = "";
+          if (j === q.correctIndex) cls = "correct";
+          else if (j === q.userAnswer) cls = "wrong";
+          return `
+            <div class="quiz-option ${cls}" style="cursor:default;">
+              <span><b>${String.fromCharCode(65+j)}.</b> ${escapeHtml(opt)}
+              ${j === q.correctIndex ? ' &nbsp;<b style="color:#059669;">✓ To\'g\'ri javob</b>' : ''}
+              ${j === q.userAnswer && j !== q.correctIndex ? ' &nbsp;<b style="color:#dc2626;">✗ Sizning javobingiz</b>' : ''}
+              </span>
+            </div>
+          `;
+        }).join("")}
+        ${q.userAnswer === null ? '<div style="color:#92400e; background:#fef3c7; padding:8px 12px; border-radius:6px; font-size:13px;">⚠ Bu savolga javob bermagansiz</div>' : ''}
+      </div>
+    </div>
+  `).join("");
+  window.scrollTo(0, 0);
+}
+
+// ---------- SEARCH ----------
+function showSearch() {
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="card">
+      <div class="toolbar">
+        <h2>🔍 Savol qidirish</h2>
+        <button class="btn btn-ghost" onclick="showHome()">← Bosh sahifa</button>
+      </div>
+      <div class="search-bar">
+        <input id="qSearch" type="text" placeholder="Savol matni yoki variant bo'yicha qidiring..." />
+      </div>
+      <div id="searchResults"></div>
+    </div>
+  `;
+  const input = document.getElementById("qSearch");
+  input.addEventListener("input", e => renderSearch(e.target.value));
+  input.focus();
+  renderSearch("");
+}
+
+function renderSearch(query) {
+  const all = loadQuestions();
+  const q = query.trim().toLowerCase();
+  const results = q
+    ? all.filter(item =>
+        item.text.toLowerCase().includes(q) ||
+        item.options.some(o => o.toLowerCase().includes(q))
+      )
+    : all;
+
+  const out = document.getElementById("searchResults");
+  if (!results.length) {
+    out.innerHTML = `<div class="empty">${q ? "Hech narsa topilmadi." : "Bazada savollar yo'q."}</div>`;
+    return;
+  }
+
+  const limited = results.slice(0, 200);
+  out.innerHTML = `
+    <p style="color:#6b7280; font-size:13px; margin-bottom:12px;">
+      Topildi: <b>${results.length}</b> ta${results.length > 200 ? ` (birinchi 200 tasi ko'rsatilmoqda)` : ''}
+    </p>
+    ${limited.map((item, i) => {
+      const origIdx = all.indexOf(item) + 1;
+      return `
+        <div class="search-result">
+          <div class="q-text">${origIdx}. ${highlight(item.text, q)}</div>
+          ${item.options.map((opt, j) => `
+            <div class="opt-line ${j === item.correct ? 'correct' : ''}">
+              <b>${String.fromCharCode(65+j)}.</b> ${highlight(opt, q)}
+              ${j === item.correct ? ' ✓' : ''}
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }).join("")}
+  `;
+}
+
+async function loadSeedFromFile() {
+  const res = await fetch("questions.txt", { cache: "no-store" });
+  if (!res.ok) throw new Error("questions.txt topilmadi (HTTP " + res.status + ")");
+  const text = await res.text();
+  const parsed = parseFile(text);
+  if (!parsed.length) throw new Error("questions.txt ichidan savollar o'qib bo'lmadi");
+  return parsed;
+}
+
+async function resetToSeed() {
+  if (!confirm("Bazani questions.txt fayldagi savollar bilan almashtirasizmi? (Qo'shimcha yuklangan savollar o'chiriladi)")) return;
+  try {
+    const seed = await loadSeedFromFile();
+    saveQuestions(seed);
+    alert("✓ Asl savollar qayta yuklandi: " + seed.length + " ta");
+    showHome();
+  } catch (e) {
+    alert("Xatolik: " + e.message + "\n\nFayl orqali (file://) ochilganda brauzer questions.txt ni o'qiy olmasligi mumkin. Ushbu holatda 'Fayl tanlash' orqali questions.txt ni qo'lda yuklang.");
+  }
+}
+
+// ---------- INIT ----------
+(async function init() {
+  showHome();
+  const existing = loadQuestions();
+  if (existing.length === 0) {
+    try {
+      const seed = await loadSeedFromFile();
+      saveQuestions(seed);
+      showHome();
+    } catch (e) {
+      console.warn("questions.txt avto-yuklanmadi:", e.message);
+    }
+  }
+})();
+</script>
+</body>
+</html>
