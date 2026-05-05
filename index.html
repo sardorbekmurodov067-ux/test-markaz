@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Test Markazi</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f3f4f6;
+    color: #1f2937;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    padding: 18px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 { font-size: 22px; font-weight: 600; cursor: pointer; }
+  header .stats { font-size: 14px; opacity: 0.9; }
+
+  main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+
+  h2 { font-size: 20px; margin-bottom: 16px; color: #111827; }
+  h3 { font-size: 16px; margin-bottom: 12px; color: #374151; }
+
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .action-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-card:hover {
+    border-color: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30,64,175,0.15);
+  }
+  .action-card .icon { font-size: 36px; margin-bottom: 8px; }
+  .action-card h3 { color: #111827; margin: 6px 0; }
+  .action-card p { color: #6b7280; font-size: 13px; }
+  .action-card.disabled { opacity: 0.5; cursor: not-allowed; }
+  .action-card.disabled:hover { transform: none; box-shadow: none; border-color: #e5e7eb; }
+
+  .upload-zone {
+    border: 2px dashed #93c5fd;
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    background: #eff6ff;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .upload-zone:hover { background: #dbeafe; border-color: #1e40af; }
+  .upload-zone.drag { background: #dbeafe; border-color: #1e40af; }
+  .upload-zone .icon { font-size: 42px; margin-bottom: 8px; }
+
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-bar input:focus { border-color: #1e40af; }
+
+  button.btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s, transform 0.05s;
+  }
+  button.btn:hover { opacity: 0.9; }
+  button.btn:active { transform: scale(0.98); }
+  .btn-primary { background: #1e40af; color: white; }
+  .btn-secondary { background: #6b7280; color: white; }
+  .btn-success { background: #059669; color: white; }
+  .btn-danger { background: #dc2626; color: white; }
+  .btn-ghost { background: #f3f4f6; color: #374151; }
+
+  .quiz-question {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .quiz-question h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #111827;
+    line-height: 1.5;
+  }
+  .quiz-options { display: grid; gap: 8px; }
+  .quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .quiz-option:hover { background: #eff6ff; border-color: #93c5fd; }
+  .quiz-option input[type="radio"] { width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
+  .quiz-option.selected { background: #dbeafe; border-color: #1e40af; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; }
+  .quiz-option.wrong { background: #fee2e2; border-color: #dc2626; }
+
+  .progress-bar {
+    background: #e5e7eb;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, #059669, #10b981);
+    height: 100%;
+    transition: width 0.3s;
+  }
+
+  .result-summary {
+    text-align: center;
+    padding: 28px;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .result-summary .score { font-size: 52px; font-weight: 700; margin: 8px 0; }
+  .result-summary .percent { font-size: 24px; opacity: 0.95; }
+
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+
+  .search-result {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .search-result .q-text { font-weight: 500; margin-bottom: 8px; }
+  .search-result .opt-line {
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .search-result .opt-line.correct {
+    background: #d1fae5;
+    color: #065f46;
+    font-weight: 500;
+  }
+
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: #1e40af; font-size: 13px; padding: 4px 0; }
+  details pre {
+    background: #f3f4f6;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    overflow-x: auto;
+    margin-top: 6px;
+    white-space: pre-wrap;
+  }
+
+  mark { background: #fef08a; padding: 0 2px; border-radius: 2px; }
+
+  @media (max-width: 600px) {
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .result-summary .score { font-size: 42px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 onclick="showHome()">📚 Test Markazi</h1>
+  <div class="stats" id="headerStats"></div>
+</header>
+
+<main id="app"></main>
+
+<input type="file" id="fileInput" accept=".txt,.text" style="display:none;" />
+
+<script>
+const STORAGE_KEY = "test_markazi_questions_v2";
+
+// ---------- STORAGE ----------
+function loadQuestions() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveQuestions(qs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(qs));
+  updateHeader();
+}
+function updateHeader() {
+  const n = loadQuestions().length;
+  const el = document.getElementById("headerStats");
+  el.innerHTML = n ? `<span class="badge">${n} ta savol bazada</span>` : "";
+}
+
+// ---------- UTILS ----------
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+function highlight(text, q) {
+  if (!q) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, "gi");
+  return escaped.replace(re, "<mark>$1</mark>");
+}
+
+// ---------- PARSER ----------
+// Tries to parse multiple common formats:
+//
+// FORMAT 1 (yulduzcha bilan):
+//   Savol matni?
+//   Variant 1
+//   *To'g'ri variant
+//   Variant 3
+//   Variant 4
+//
+// FORMAT 2 (raqam + harf, oxirida +/* belgi yoki to'g'ri javob):
+//   1. Savol?
+//   A) variant
+//   B) variant *
+//   C) variant
+//   D) variant
+//
+// FORMAT 3 (+ bilan):
+//   Savol?
+//   + To'g'ri javob
+//   - Variant
+//   - Variant
+//   - Variant
+//
+// Bloklar bo'sh qator bilan ajratiladi.
+
+function parseFile(text) {
+  // Normalize line endings
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  // Split into blocks by blank lines
+  const blocks = text.split(/\n\s*\n+/).map(b => b.trim()).filter(Boolean);
+  const questions = [];
+
+  for (const block of blocks) {
+    const parsed = parseBlock(block);
+    if (parsed) questions.push(parsed);
+  }
+  return questions;
+}
+
+function parseBlock(block) {
+  const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+  if (lines.length < 2) return null;
+
+  // First line is the question (strip leading number)
+  let qText = lines[0].replace(/^\d+[\.\):]\s*/, "").trim();
+  if (!qText) return null;
+
+  const optLines = lines.slice(1);
+  const options = [];
+  let correct = -1;
+
+  for (let i = 0; i < optLines.length; i++) {
+    let line = optLines[i];
+    let isCorrect = false;
+
+    // Marker at start: *, +
+    if (/^[\*\+]\s*/.test(line)) {
+      isCorrect = true;
+      line = line.replace(/^[\*\+]\s*/, "");
+    }
+    // Marker at end: *
+    else if (/\s*\*\s*$/.test(line)) {
+      isCorrect = true;
+      line = line.replace(/\s*\*\s*$/, "");
+    }
+    // - prefix means non-correct (just strip)
+    else if (/^-\s*/.test(line)) {
+      line = line.replace(/^-\s*/, "");
+    }
+
+    // Strip A) B) 1) etc.
+    line = line.replace(/^[A-Za-zА-Яа-яЎўҚқҒғҲҳ]\s*[\)\.\:]\s*/, "");
+    line = line.replace(/^\d+\s*[\)\.\:]\s*/, "");
+    line = line.trim();
+
+    if (!line) continue;
+
+    if (isCorrect && correct === -1) correct = options.length;
+    options.push(line);
+  }
+
+  if (options.length < 2) return null;
+  // If no correct marker found, default to first option (warn user later)
+  if (correct === -1) correct = 0;
+
+  // Pad to 4 options if fewer
+  while (options.length < 4) options.push("—");
+  // If more than 4, keep first 4 (rare)
+  const finalOpts = options.slice(0, Math.max(4, options.length));
+
+  return { text: qText, options: finalOpts, correct };
+}
+
+// ---------- HOME ----------
+function showHome() {
+  const qs = loadQuestions();
+  const total = qs.length;
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="card">
+      <h2>📂 Savollar fayli</h2>
+      <div class="upload-zone" id="uploadZone">
+        <div class="icon">📄</div>
+        <div><b>Fayl tanlash yoki shu yerga tashlash</b></div>
+        <div style="color:#6b7280; font-size:13px; margin-top:6px;">.txt fayl — savollar bo'sh qator bilan ajratilgan</div>
+      </div>
+      ${total ? `<p style="margin-top:12px; color:#059669;">✓ Bazada <b>${total}</b> ta savol bor.</p>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="resetToSeed()">↺ Asl savollarni qayta yuklash</button>
+          <button class="btn btn-ghost" onclick="if(confirm('Barcha savollarni o\\'chirasizmi?')){saveQuestions([]);showHome();}">🗑 Bazani tozalash</button>
+        </div>` : ''}
+      <details>
+        <summary>Fayl formatini ko'rish</summary>
+        <pre>1. Savol matni?
+A) Birinchi variant
+B) Ikkinchi variant *
+C) Uchinchi variant
+D) To'rtinchi variant
+
+2. Yana bir savol?
+*To'g'ri javob
+Boshqa variant
+Boshqa variant
+Boshqa variant
+
+3. Uchinchi savol?
++ To'g'ri javob
+- Noto'g'ri
+- Noto'g'ri
+- Noto'g'ri</pre>
+        <div style="margin-top:6px; color:#6b7280; font-size:13px;">
+          To'g'ri javobni belgilash usullari: variant oldida <code>*</code> yoki <code>+</code>, yoki variant oxirida <code>*</code>.
+          Savollar bo'sh qator bilan ajratiladi.
+        </div>
+      </details>
+    </div>
+
+    <div class="actions-grid">
+      <div class="action-card ${total < 30 ? 'disabled' : ''}" onclick="${total >= 30 ? "startQuiz(30)" : ''}">
+        <div class="icon">🎯</div>
+        <h3>30 talik test</h3>
+        <p>${total >= 30 ? "Tasodifiy 30 ta savol" : `Kamida 30 ta savol kerak (hozir ${total})`}</p>
+      </div>
+      <div class="action-card ${total < 50 ? 'disabled' : ''}" onclick="${total >= 50 ? "startQuiz(50)" : ''}">
+        <div class="icon">🏆</div>
+        <h3>50 talik test</h3>
+        <p>${total >= 50 ? "Tasodifiy 50 ta savol" : `Kamida 50 ta savol kerak (hozir ${total})`}</p>
+      </div>
+      <div class="action-card ${total === 0 ? 'disabled' : ''}" onclick="${total > 0 ? "showSearch()" : ''}">
+        <div class="icon">🔍</div>
+        <h3>Savol qidirish</h3>
+        <p>${total > 0 ? "Bazadan savol qidirish" : "Avval savollarni yuklang"}</p>
+      </div>
+    </div>
+  `;
+
+  setupUpload();
+  updateHeader();
+}
+
+function setupUpload() {
+  const zone = document.getElementById("uploadZone");
+  const input = document.getElementById("fileInput");
+  zone.addEventListener("click", () => input.click());
+  input.onchange = e => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+    input.value = "";
+  };
+  zone.addEventListener("dragover", e => { e.preventDefault(); zone.classList.add("drag"); });
+  zone.addEventListener("dragleave", () => zone.classList.remove("drag"));
+  zone.addEventListener("drop", e => {
+    e.preventDefault();
+    zone.classList.remove("drag");
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+}
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const text = ev.target.result;
+    const parsed = parseFile(text);
+    if (!parsed.length) {
+      alert("Fayldan hech qanday savol topilmadi. Format to'g'riligini tekshiring.");
+      return;
+    }
+    const existing = loadQuestions();
+    const choice = existing.length > 0
+      ? confirm(`${parsed.length} ta savol topildi.\n\nMavjud ${existing.length} ta savolga qo'shish uchun OK,\neski bazani almashtirish uchun Bekor qilish bosing.`)
+      : true;
+    if (choice) {
+      saveQuestions([...existing, ...parsed]);
+      alert(`✓ ${parsed.length} ta savol qo'shildi. Jami: ${existing.length + parsed.length}`);
+    } else {
+      saveQuestions(parsed);
+      alert(`✓ Baza yangilandi: ${parsed.length} ta savol.`);
+    }
+    showHome();
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+// ---------- QUIZ ----------
+let quizState = null;
+
+function startQuiz(count) {
+  const all = loadQuestions();
+  if (all.length < count) {
+    alert(`Yetarli savol yo'q. Kerak: ${count}, mavjud: ${all.length}`);
+    return;
+  }
+  const pool = shuffle(all).slice(0, count);
+  quizState = {
+    questions: pool.map(q => {
+      const idxs = shuffle([0, 1, 2, 3].filter(i => i < q.options.length));
+      return {
+        text: q.text,
+        options: idxs.map(i => q.options[i]),
+        correctIndex: idxs.indexOf(q.correct),
+        userAnswer: null
+      };
+    }),
+    startedAt: Date.now(),
+    count: count
+  };
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const app = document.getElementById("app");
+  const answered = quizState.questions.filter(q => q.userAnswer !== null).length;
+  const total = quizState.questions.length;
+  app.innerHTML = `
+    <div class="card">
+      <div class="toolbar">
+        <h2>🎯 ${total} talik test</h2>
+        <span class="badge badge-blue" id="answerBadge">${answered} / ${total} javob berildi</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:${(answered/total)*100}%"></div></div>
+      <div id="quizQs"></div>
+      <div style="display:flex; gap:8px; margin-top:20px; justify-content:space-between; flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="if(confirm('Testni bekor qilasizmi?')) showHome()">← Bekor qilish</button>
+        <button class="btn btn-success" onclick="finishQuiz()">✓ Tugatish</button>
+      </div>
+    </div>
+  `;
+  const qc = document.getElementById("quizQs");
+  qc.innerHTML = quizState.questions.map((q, i) => `
+    <div class="quiz-question" id="qb_${i}">
+      <h4>${i+1}. ${escapeHtml(q.text)}</h4>
+      <div class="quiz-options">
+        ${q.options.map((opt, j) => `
+          <label class="quiz-option ${q.userAnswer === j ? 'selected' : ''}" data-i="${i}" data-j="${j}">
+            <input type="radio" name="q_${i}" ${q.userAnswer === j ? 'checked' : ''} onchange="answerQ(${i}, ${j})" />
+            <span><b>${String.fromCharCode(65+j)}.</b> ${escapeHtml(opt)}</span>
+          </label>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+  window.scrollTo(0, 0);
+}
+
+function answerQ(i, j) {
+  quizState.questions[i].userAnswer = j;
+  const answered = quizState.questions.filter(q => q.userAnswer !== null).length;
+  const total = quizState.questions.length;
+  document.getElementById("progressFill").style.width = `${(answered/total)*100}%`;
+  document.getElementById("answerBadge").textContent = `${answered} / ${total} javob berildi`;
+  const block = document.getElementById(`qb_${i}`);
+  block.querySelectorAll(".quiz-option").forEach((el, k) => {
+    el.classList.toggle("selected", k === j);
+  });
+}
+
+function finishQuiz() {
+  const unanswered = quizState.questions.filter(q => q.userAnswer === null).length;
+  if (unanswered > 0) {
+    if (!confirm(`${unanswered} ta savolga javob bermadingiz. Baribir tugatasizmi?`)) return;
+  }
+  renderResult();
+}
+
+function renderResult() {
+  const total = quizState.questions.length;
+  const correct = quizState.questions.filter(q => q.userAnswer === q.correctIndex).length;
+  const wrong = quizState.questions.filter(q => q.userAnswer !== null && q.userAnswer !== q.correctIndex);
+  const skipped = quizState.questions.filter(q => q.userAnswer === null);
+  const percent = Math.round((correct / total) * 100);
+  const elapsed = Math.round((Date.now() - quizState.startedAt) / 1000);
+  const mins = Math.floor(elapsed / 60), secs = elapsed % 60;
+
+  let grade = "📚 Ko'proq mashq qiling";
+  if (percent >= 90) grade = "🏆 A'lo!";
+  else if (percent >= 75) grade = "🥈 Yaxshi";
+  else if (percent >= 60) grade = "🥉 Qoniqarli";
+
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="card">
+      <div class="result-summary">
+        <div style="font-size:18px;">${grade}</div>
+        <div class="score">${correct} / ${total}</div>
+        <div class="percent">${percent}%</div>
+        <div style="margin-top:10px; opacity:0.9; font-size:14px;">
+          ✓ To'g'ri: ${correct} • ✗ Xato: ${wrong.length} • ⊝ Javobsiz: ${skipped.length} • ⏱ ${mins}:${secs.toString().padStart(2,"0")}
+        </div>
+      </div>
+
+      ${wrong.length || skipped.length ? `<h3>Xato va javobsiz savollar (${wrong.length + skipped.length})</h3>` : `<div class="empty">🎉 Barcha savollarga to'g'ri javob berdingiz!</div>`}
+
+      <div id="reviewList"></div>
+
+      <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="showHome()">← Bosh sahifa</button>
+        <button class="btn btn-success" onclick="startQuiz(${quizState.count})">🔄 Yangi ${quizState.count} talik test</button>
+      </div>
+    </div>
+  `;
+
+  const review = [];
+  quizState.questions.forEach((q, idx) => {
+    if (q.userAnswer !== q.correctIndex) review.push({ q, idx });
+  });
+
+  document.getElementById("reviewList").innerHTML = review.map(({ q, idx }) => `
+    <div class="quiz-question">
+      <h4>${idx+1}. ${escapeHtml(q.text)}</h4>
+      <div class="quiz-options">
+        ${q.options.map((opt, j) => {
+          let cls = "";
+          if (j === q.correctIndex) cls = "correct";
+          else if (j === q.userAnswer) cls = "wrong";
+          return `
+            <div class="quiz-option ${cls}" style="cursor:default;">
+              <span><b>${String.fromCharCode(65+j)}.</b> ${escapeHtml(opt)}
+              ${j === q.correctIndex ? ' &nbsp;<b style="color:#059669;">✓ To\'g\'ri javob</b>' : ''}
+              ${j === q.userAnswer && j !== q.correctIndex ? ' &nbsp;<b style="color:#dc2626;">✗ Sizning javobingiz</b>' : ''}
+              </span>
+            </div>
+          `;
+        }).join("")}
+        ${q.userAnswer === null ? '<div style="color:#92400e; background:#fef3c7; padding:8px 12px; border-radius:6px; font-size:13px;">⚠ Bu savolga javob bermagansiz</div>' : ''}
+      </div>
+    </div>
+  `).join("");
+  window.scrollTo(0, 0);
+}
+
+// ---------- SEARCH ----------
+function showSearch() {
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="card">
+      <div class="toolbar">
+        <h2>🔍 Savol qidirish</h2>
+        <button class="btn btn-ghost" onclick="showHome()">← Bosh sahifa</button>
+      </div>
+      <div class="search-bar">
+        <input id="qSearch" type="text" placeholder="Savol matni yoki variant bo'yicha qidiring..." />
+      </div>
+      <div id="searchResults"></div>
+    </div>
+  `;
+  const input = document.getElementById("qSearch");
+  input.addEventListener("input", e => renderSearch(e.target.value));
+  input.focus();
+  renderSearch("");
+}
+
+function renderSearch(query) {
+  const all = loadQuestions();
+  const q = query.trim().toLowerCase();
+  const results = q
+    ? all.filter(item =>
+        item.text.toLowerCase().includes(q) ||
+        item.options.some(o => o.toLowerCase().includes(q))
+      )
+    : all;
+
+  const out = document.getElementById("searchResults");
+  if (!results.length) {
+    out.innerHTML = `<div class="empty">${q ? "Hech narsa topilmadi." : "Bazada savollar yo'q."}</div>`;
+    return;
+  }
+
+  const limited = results.slice(0, 200);
+  out.innerHTML = `
+    <p style="color:#6b7280; font-size:13px; margin-bottom:12px;">
+      Topildi: <b>${results.length}</b> ta${results.length > 200 ? ` (birinchi 200 tasi ko'rsatilmoqda)` : ''}
+    </p>
+    ${limited.map((item, i) => {
+      const origIdx = all.indexOf(item) + 1;
+      return `
+        <div class="search-result">
+          <div class="q-text">${origIdx}. ${highlight(item.text, q)}</div>
+          ${item.options.map((opt, j) => `
+            <div class="opt-line ${j === item.correct ? 'correct' : ''}">
+              <b>${String.fromCharCode(65+j)}.</b> ${highlight(opt, q)}
+              ${j === item.correct ? ' ✓' : ''}
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }).join("")}
+  `;
+}
+
+function resetToSeed() {
+  if (!confirm("Bazani asl 202 ta savol bilan almashtirasizmi? (Yuklangan qo'shimcha savollar o'chiriladi)")) return;
+  saveQuestions(SEED_QUESTIONS.slice());
+  alert("✓ Asl savollar qayta yuklandi: " + SEED_QUESTIONS.length + " ta");
+  showHome();
+}
+
+// ---------- INIT ----------
+const SEED_QUESTIONS = [{"text":"Tezlik modulining o`zgarishini nima xarakterlaydi?","options":["Tezlanishning tangensial tashkil etuvchisi","Ko'chish","Tezlanishning normal tashkil etuvchisi","Markazga intilma tezlanish"],"correct":0},{"text":"Tangensial tezlanish va normal tezlanish nolga teng bo'lsa, bu q�nday harakat?","options":["To`g`ri chiziqli tekis harakat","Egri chiziqli tekis harakat","Aylanma bo`ylab tekis harakat","To`g`ri chiziqli notekis harakat"],"correct":0},{"text":"Jismlarning o`zaro tortishish kuchlari orqali aniqlanadigan massaga ... massa deyiladi.","options":["Gravitasion","Inert","Molekular","Katta"],"correct":0},{"text":"Keltirilgan to`lqinlar orasidan qaysi birlari ko`ndalang to`lqinlar turiga kiradi? 1.Suv betidagi to`lqinlar.2.Ultratovush to`lqinlari.3 Radioto`lqinlar 4.Yorug`lik to`lqinlari 5. Gazdagi tovush to`lqinlari","options":["1,3,4","2,3,4","4,5","2,4,5"],"correct":0},{"text":"Tovush to`lqinining balandligi nimaga bog`liq?","options":["Tebranish amplitudasi","To`lqin intensivligiga","Tovush chastotasiga","Tebranish fazasiga"],"correct":0},{"text":"Jism o'z harakati davomida chizgan chizig'i . . . . . deyiladi?","options":["Trayektoriya","Bosib o'tilgan yo'l","Mexanik harakat","Yo'l"],"correct":0},{"text":"Jism harakatining ixtiyoriy teng vaqt oraliqlarida bir xil yo'l bosib o'tsa bu harakat . . . . . deyiladi.?","options":["Tekis harakat","Mexanik harakat","Notekis harakat","Yo'lning ba'zi qismlarida tekis"],"correct":0},{"text":"Yer Quyosh atrofida 108000 km/s tezlik bilan harakatlanadi. Bu tezlikni m/s ga aylantiring?","options":["108000000 m/s","30000 m/s","108 m/s","180 m/s"],"correct":0},{"text":"Jism 1 sek.da 1 m yo'lni bosib o'tsa, bu harakat . . . . deyiladi.?","options":["Tekis harakat","Aylanma harakat","Notekis harakat","Egri chiziqli harakat"],"correct":0},{"text":"Tekis harakatda v tezlik bilan harakatlanayotgan jism t vaqtda o'tgan yo'l qaysi formula yordamida aniqlanadi?","options":["S=v?t","v= S/t","S=(at^2)/2","S=v0t+(at^2)/2"],"correct":0},{"text":"kg massali jismga 20 N kuch ta'sir etmoqda. Bu kuch ta'sirida jism qanday tezlanish oladi?","options":["2 m/s^2","1,5 m/s^2","1 m/s^2","2,5 m/s^2"],"correct":0},{"text":"Kuchga oid quyidagi ta'kid va munosabatlardan qaysi biri noto`g`ri?","options":["Kuch skalyar kattalikdir","Kuch dinamometr yordamida o`lchanadi","Kuchning asosiy birligi qilib 1 N qabul qilingan","1N=1000 mN"],"correct":0},{"text":"Matematik mayatnikning tebranish amplitudasi 2 marta ortsa uning chastotasi qanday o'zgaradi?","options":["O'zgarmaydi","2 marta ortadi","2 marta kamayadi","4 marta ortadi"],"correct":0},{"text":"Tovushning havoda tarqalish tezligi nimaga teng?","options":["340 m/s","1450 m/s","5600 m/s","1280 m/s"],"correct":0},{"text":"Kuch momenti deb qanday kattalikka aytiladi?","options":["Kuchni kuch ta'sir chizigidan aylanish o'qigacha bo'lgan eng qisqa masofaga ko'paytmasiga","Kuchning burchak tezlanishga ko'paytmasiga aytiladi","Kuchni kuch yelkasiga nisbatiga aytiladi","Jism massasining tezlikka ko'paytmasiga aytiladi"],"correct":0},{"text":"Quyidagi formulalardan qaysi biri moddiy nuqta impulsini ifodalaydi?","options":["P=mV","P=F/S","P=mg","P=ma"],"correct":0},{"text":"Ta'riflardan qaysi biri Nyutonning birinchi qonunini to'la ifodalaydi?","options":["har qanday moddiy nuqta (jism)ga boshqa jismlar ta'sir etmasa,yoki ta'sir etuvchi kuchlar o'zaro kompensatsiyalansa, u o'zining tinch holatini yoki to'g'ri chiziqli tekis harakatini saqlaydi","jismga tashqi kuch ta'sir etmasa, u tinch holatini saqlaydi","jismga tashqi kuch ta'sir etmasa, u to'g'ri chiziqli tekis harakat qiladi","Nyutonning birinchi qonuni inersial sanoq sistemalari mavjudligini tasdiqlaydi"],"correct":0},{"text":"Energiyaning SI sistemasidagi dagi birligi nima?","options":["Joul","Vatt","Kaloriya","N?m"],"correct":0},{"text":"Mexanik harakat deb, .... ga aytiladi.","options":["Jism vaziyatining boshqa jismlarga nisbatan o'zgarishi","Jism harakatlanayotgan treaktoriya uzunligi","Jism harakatlanayotgan chiziq","Jism bosib o'tgan yo'li"],"correct":0},{"text":"Aylanma harakat qiluvchi jismning harakat miqdori momenti quyidagi qaysi kattaliklarga bog'liq?","options":["Jism inersiya momenti va burchak tezlikka","Jism massasi, aylanish o'qigacha bo'lgan masofa, tezlikka","Jism massasi va burchak tezlikka","Inersiya momenti va massasiga"],"correct":0},{"text":"Purjinali mayatnikning yuk massasi 4 matra orttirilsa uning chastotasi qanday o'zgaradi?","options":["2 marta kamayadi","2 marta ortadi","o'zgarmaydi","4 marta oshadi"],"correct":0},{"text":"Qanday to'qnashuvlar markaziy hisoblanadi?","options":["Urilish chizigi ikkala jismning ham og'irligi markazlaridan o'tgan bo'lsa","Ikki jism to'qnashishiga qadar urilish chizigi bo'ylab harakatlansa","Ikki jism to'qnashishiga qadar urilish chizig'i bo'ylab harakatlanmasa","Har qanday to'qnashuv markaziy bo'ladi"],"correct":0},{"text":"m/s tezlik bilan harakatlanayotgan samolyot 3000 m yo'lni qancha vaqtda bosib o'tadi?","options":["15 s","150 s","600 s","60 s"],"correct":0},{"text":"SI sistemasida uzunlikning asosiy birligi qanday?","options":["Metr","Kilometr","Santimetr","Detsimetr"],"correct":0},{"text":"Vektor kattaliklar deb nimaga aytiladi?","options":["Son qiymatidan tashqari yo'nalishi ham ko'rsatilishi zarur bo'lgan kattaliklarga aytiladi","Son qiymati bilan aniqlanadigan kattalikka","Yo'nalishi bilan aniqlanadigan kattalikka","Bosib o'tib o'tiladigan yo'lga aytiladi"],"correct":0},{"text":"Barometr yordamida qanday fizik kattalik aniqlanadi?","options":["Atmosfera bosimi","Kuch","Tezlanish","Og'irlik"],"correct":0},{"text":"Yopiq idishdagi suyuqlik yoki gazga tashqi kuchlar ostida berilayotgan bosim shu kuchlar yordamida barcha yo'nalishlar bo'yicha bir xil tarqaladi. Bu kimning qonuni?","options":["Paskal qonuni","Bernulli qonuni","Arximed qonuni","Nyuton qonuni"],"correct":0},{"text":"Avogadro sonining qiymatini belgilang.","options":["6,02?10^23 mol^-1","1,38?10^-23 J/K","6,62?10^-34 Js","6,67?10^-11 N?m^2/kg^2"],"correct":0},{"text":"Ideal gaz modelining to'liq ta'rifini belgilang.","options":["Molekulalari orasida o'zaro tortishish va itarishish kuchlari mavjud bo'lmagan, molekulalar o'lchamlari idish hajmiga nisbatan juda ki�hik deb hisoblanadigan gaz","Molekulalari orasida o'zaro tortishish va itarishish kuchlari mavjud bo'lgan gaz","Molekulalari orasida o'zaro tortishish va itarishish kuchlari mavjud bo'lmagan va molekulalar hajmi juda katta bo'lgan gaz","Molekulalar hajmi hisobga olinmaydigan gaz"],"correct":0},{"text":"Izotermik jarayonda qaysi kattalik o'zgarmaydi?","options":["Harorat","Hajm","Bosim","Zichlik"],"correct":0},{"text":"Molekulalarning tartibsiz harakati natijasida ikkita turli moddaning aralashib ketish hodisasiga ..... deyiladi.","options":["Diffuziya","Ichki ishqalanish","Konveksiya","Issiqlik almashinishi"],"correct":0},{"text":"Suv bug'larining sovib, qaytadan suyuqlikka aylanishiga .... deyiladi.","options":["Kondensatsiya","Sublimatsiya","Diffuziya","Bug'lanish"],"correct":0},{"text":"1g karbonat angidrid (CO2) da qancha molekula bor? (CO2) ning molyar massasi 44?10^-3 kg/mol.","options":["1,4?10^22","1,2?10^21","3?10^20","2,5?10^21"],"correct":0},{"text":"Ideal issiqlik mashinasi qanday qismlardan iborat?","options":["isitgich, ishchi jism va sovutgich","isitgich va sovutgich","isitgich va ishchi jism","sovutgich va ishchi jism"],"correct":0},{"text":"Qaysi termodinamik jarayonda sistemaning muhit bilan issiqlik almashinishi bo'lmaydi.","options":["Adiabatik","Izotermik","Izoxorik","Izobarik"],"correct":0},{"text":"Termodinamika II bosh qonuni uchun Plank ta'rifini bering.","options":["birdan-bir natijasi issiqlik miqdorini ishga aylantirishdan iborat bo'lgan davriy jarayon amalga oshmaydi;","birdan-bir natijasi faqat isitgich bilan ishlaydigan davriy mashina qurish mumkin emas;","birdan-bir natijasi faqat sovutgichdan iborat davriy ishlaydigan mashina yasash mumkin emas;","harorati pastroq jismdan harorati yuqoriroq jismga energiyani o'z-o'zidan o'tkazilmaydi"],"correct":0},{"text":"Idishdagi gaz molekulalarining konsentratsiyasi 2 marta kamaysa va o`rtacha kvadratik tezligi 4 marta oshsa, gaz bosimi qanday o`zgaradi.","options":["8 marta oshadi","2 marta oshadi","8 marta kamayadi","2 marta kamayadi"],"correct":0},{"text":"Ikki jism o'zaro issiqlik almashinuvi muvozanatida. Ularning qaysi fizik parametrlari bir xil?","options":["faqat temperatura","faqat bosim","faqat molekulalar issiqlik harakatining o'rtacha kvadratik tezligi","temperatura va molekulalarning o'rtacha kvadratik tezligi"],"correct":0},{"text":"Absolyut shkaladagi 100^0 C temperatura Kelvin shkalasidagi qaysi temperaturaga mos?","options":["373,15^0 K","-373,15^0 K","-273,15^0 K","173,15^0 K"],"correct":0},{"text":"Hajmi 8,3 m^3 bo'lgan idishdagi 0,02 kg vodorodning temperaturasi 27^0 C. Uning bosimini hisoblang.","options":["3?10^3 Pa","3 Pa","6 Pa","27 Pa"],"correct":0},{"text":"Ikki mol suvning massasi qanchaga teng? Suvning molyar massasi 18?10^-3 kg/mol.","options":["36 g","32 g","18 g","16 g"],"correct":0},{"text":"Gaz suyuqlikka aylanishi mumkin bo`lgan chegaraviy temperaturaga... temperatura deyiladi.","options":["Kritik","Absolut","Kyuri","Termodinamik"],"correct":0},{"text":"Gazga 500 J issiqlik miqdori berilganda, uning ichki energiyasi 200 J ga oshdi. Gazning bajargan ishini toping.","options":["300 J","0","700 J","200 J"],"correct":0},{"text":"10^5 bosim ostidagi gaz hajmini 2 dan 5 m^3 gacha ortdi. Gazning kengayishi davomida bajarilgan ishni toping.","options":["3?10^5 J","5?10^5 J","2?10^5 J","0"],"correct":0},{"text":"Qaysi moddalarda (qattiq, suyuq va gaz) diffuzya hodisasi ro'y beradi?","options":["qattiq, suyuq va gaz holatdagi jismlarda.","faqat gazlarda","faqat suyuqliklarda","faqat qattiq jismlarda"],"correct":0},{"text":"Diffuziya hodisasi temperaturaga qanday bog'liq?","options":["Temperatura yuqori bo'lgan sari, diffuziya tezroq bo'ladi.","Temperatura yuqori bo'lgan sari, diffuziya sekinroq o'tadi.","Diffuziya temperaturaga bog'liq emas.","Kritik temperaturaga bog'liq"],"correct":0},{"text":"Molekulalar o'z o'lchamlariga nisbatan katta masofada joylashgan, o'zaro kuchsiz ta'sirlashadi, xaotik harakat qiladi. Bu qanday modda?","options":["Gaz","Qattiq jism","Suyuqlik","Bunday modda yo'q"],"correct":0},{"text":"\"Bir xil t�mp�r�ratura va bosimda turgan istalgan gazning birlik hajmidagi mol�kulalar soni t�ng bo'ladi\" Bu qonun kim tomonidan kashf qilingan?","options":["Avogadro","J.Dalton","Loshmidt","Lomonosov"],"correct":0},{"text":"Gazning harorati 3 marta orttirilsa, mol�kulalarning o'rtacha kin�tik en�rgiyasi qanday o'zgaradi?","options":["3 marta ortadi","2 marta ortadi","o'zgarmaydi","3 marta kamayadi"],"correct":0},{"text":"Issiqlik mashinasi isitgichdan 100 J issiqlik miqdori olib, sovutgichga 60 J issiqlik miqdori b�radi. Mashinaning F.I.K. qancha?","options":["40 %","60 %","55 %","50 %"],"correct":0},{"text":"Mol�kulalarning o'rtacha t�zligini o'zgartirmay, konts�ntratsiyasi 3 marta orttirilsa, uning bosimi qanday o'zgaradi?","options":["3 marta ortadi","2 marta ortadi","o'zgarmaydi","3 marta kamayadi"],"correct":0},{"text":"Ochiq idishdagi suv 95^0 C da qaynashiga sabab nima?","options":["Havo bosimi normal atmosf�ra bosimidan kichik bo'lishi","Havo bosimi normal atmosfera bosimidan katta bo'lishi","Havo bosimi atmosfera bosimiga teng bo'lishi","Kritik bosimda bo'lishi"],"correct":0},{"text":"SI sist�madagi mol�kulyar fizikaga t�gishli asosiy fizik kattaliklarni ko'rsating.","options":["Modda miqdori, harorat, massa","Tezlanish, harorat","Tezlik","Uzunlik, bosim"],"correct":0},{"text":"Issiqxonadagi havoning namligi 100 % bo'lsa, quruq va ho'l t�rmom�trlarning ko'rsatigichi qanday bo'ladi?","options":["t1=t2","t1>t2","t1<t2","t1+t2=100"],"correct":0},{"text":"Vaqt o'tishi bilan muvozanat vaziyati atrofida davriy ravishda takrorlanib turadigan harakatlarga ... deyiladi.","options":["Tebranishlar","To`lqinlar","Aylanma harakat","Tekis harakat"],"correct":0},{"text":"Bikrligi 250 N/m bo`lgan prujinaga bog`lab qo`yilganda 16 s ichida 20 marta tebranadigan yukning massasini toping.","options":["4 kg","6 kg","6,5 kg","5,5 kg"],"correct":0},{"text":"Mayatnik 1 sek.da 10 marta tebranadi. Mayatnikning tebranish davri qancha?","options":["0,1s","0,15s","1s","2s"],"correct":0},{"text":"Bir xil vaqt ichida biri 10 marta, ikkinchisi esa 30 marta tebranadigan ikkita matematik mayatnikning uzunliklari qanday nisbatda bo`ladi?","options":["9/1","3/1","6/1","9/3"],"correct":0},{"text":"To'lqin deb nimaga aytiladi?","options":["Elastik muhitda tebranishlarning tarqalishiga to'lqin deyiladi","Energiyani ko'chiruvchi jarayonga aytiladi","Vaqt o'tishi bilan muvozanat vaziyati atrofida davriy ravishda takrorlanib turadigan harakatlarga","Jism vaziyatining boshqa jismlarga nisbatan o'zgarishiga"],"correct":0},{"text":"Elektr maydoni E-sirkulyatsiyasining fizikaviy ma'nosi qanday?","options":["Yopiq kontur bo'ylab birlik musbat zaryadni ko'chirishda bajarilgan ish demakdir","Birlik musbat zaryadni maydonning bir nuqtasidan ikkinchi nuqtasiga ko'chirishdagi ish tushuniladi","Zaryadni ma'lum radiusli aylana bo'ylab siljitishdagi ish","Tashqi kuchlarning maydon tashqarisidagi bajaradigan ishi tushuniladi"],"correct":0},{"text":"Elektr maydonining biror nuqtasidagi potensiali deb nimaga aytiladi?","options":["Shu nuqtaga kiritilgan musbat zaryadni ? gacha ko'chirishda yoki manfiy zaryadni ? dan shu nuqtaga ko'chirganda bajarilgan ishning ana shu zaryad miqdoriga nisbati","Yopiq kontur bo'ylab birlik musbat zaryadni ko'chirishdagi bajarilgan ish","Musbat zaryadni ma'lum radiusli aylana bo'ylab siljitishdagi ishning zaryad miqdoriga nisbati.","Musbat zaryadni to'g'ri geometrik shaklli o'tkazgich bo'ylab ko'chirishda bajarilgan ishning zaryad miqdoriga nisbati"],"correct":0},{"text":"Elektrostatik potensial energiya deganda nima tushuniladi?","options":["Elektrostatik maydonda q nuqtaviy zaryadni hosil qiluvchi maydon energiyasi.","Yer sirtidan ma lum balandlikka ko'tarilgan jism energiyasi.","Elastik deformatsiyalangan jism energiyasi","Potensial kuch maydoni energiyasining kamayishi hisobidan bajarilgan ish."],"correct":0},{"text":"Dielektr mavjudligida E vektor qanday maydonni tavsiflaydi?","options":["Bog'liqli zaryadlar maydonini","Erkin zaryadlar maydonini","Erkin va bog'liqli zaryadlarning natijaviy maydonini","Dielektrikdagi dipol momentini"],"correct":0},{"text":"Dipolli qutblanish deb nimaga aytiladi?","options":["Molekulalar dipol momentinlarini tashqi maydon boylab orientasiyasiga aytiladi","Qutbsiz molekulali dielektr atomlarida induksiyalangan dipol momentlarining paydo bolishiga","Molekulalar ega bolgan dipol momentlarini tashqi maydonga qarshi orientirlashga","Ionlarning tartibli harakatiga"],"correct":0},{"text":"Tashqi elektr maydon ta'sirida o'tkazgichlardagi zaryadlar qanday harakatga keladi?","options":["Musbat zaryadlar maydon bo'ylab, manfiy zaryadlar maydonga qarshi","Manfiy zaryadlar maydon bo'ylab, musbat zaryadlar maydonga qarshi","Harakatlanmaydi","Hamma zaryadlar maydon bo'ylab harakatlanadi"],"correct":0},{"text":"O'tkazgichning tashqi sirtida kuchlanganlik vektori qanday yo'nalgan?","options":["Sirtning har qaysi nuqtasiga urunma bo'ylab","Sirtning har qaysi nuqtasidagi normal bo'ylab","Erkin yo'nalgan","Sirtga yo'nalgan urinmaga perpendikulyar"],"correct":0},{"text":"Elektr toki deb nimaga aytiladi?","options":["Elektr maydon ta'sirida zaryadlangan zarrachalarning tartibli harakatiga;","Zaryadlarning statik holatda qolishiga","Elektr maydon ta'sirida erkin protonlarning tartibli harakatiga;","Zaryadlanmagan zarrachalarning tartibli harakatiga"],"correct":0},{"text":"O'tkazgichning qarshiligi nimalarga bog'liq?","options":["O'lchamlariga va materialiga","Faqat ichki tuzilshiga","Faqat uzunligiga","Faqat ko'ndalang kesim yuzasiga"],"correct":0},{"text":"Dastlabki cho'g'lanma lampa kim tomonidan kashf qilingan?","options":["Lodigin","Edison","Joul","Faradey"],"correct":0},{"text":"Suyuqliklarda elektr toki qanday elektr zaryadlarning tartibli harakati tufayli hosil bo'ladi?","options":["Musbat va manfiy ionlar","Manfiy ionlar va elektronlar","Atomlar","Molekulalar"],"correct":0},{"text":"O'tkazgichda induksiyalangan zaryadlar qanday taqsimlanadi?","options":["O'tkazgichning tashqi sirti bo'ylab","O'tkazgichning ichki sirti bo'ylab","O'tkazgichning butun hajmi bo'ylab","O'tkazgich va unga yaqin muhitda tekis taqsimlanadi"],"correct":0},{"text":"O'tkazgichning ko'ndalang kesimidan vaqt birligi ichida o'tayotgan zaryadga miqdor jihatdan teng bo'lgan kattalikka ...... deyiladi.","options":["Tok kuchi;","Kuchlanish;","Quvvat;","Tok zichligi;"],"correct":0},{"text":"Shoyiga ishqalanib elektrlangan ikki shisha tayoqcha bir-biri bilan qanday ta'sirlashadi?","options":["Itarishadi","Tasirlashmaydi","Tortishadi","Tasirlashadi"],"correct":0},{"text":"Quyidagi o`tkazgich materiallardan qaysi birining qarshiligi eng katta?","options":["Temir","Alyuminiy","Mis","Kumush"],"correct":0},{"text":"O'zgaruvchan tok zanjirida induktivligi 50 mH bo'lgan g'altak va 20 �F sig'imli kondensator ketma-ket ulangan. Zanjirda rezonans ro'y beradigan siklik chastotani toping (rad.s).","options":["10^3","10^2","10^5","10^4"],"correct":0},{"text":"Qo'zg'almas elektr zaryadlari hosil qilgan maydon qanday ataladi?","options":["Elektr","Elektrodinamik","Elektromagnit","Magnit"],"correct":0},{"text":"Neytral suv tomchisi ikkiga bolingan. Birinchisi +q zaryadga ega. Ikkinchi tomchi qanday e zaryadga ega?","options":["-q","0","+2q","-2q"],"correct":0},{"text":"Dielektrik singdiruvchanlik nima?","options":["O'lchamsiz kattalik bolib, elektr maydonida dielektr qutblanishini xarakterlaydi va ?=E0/E nisbat orqali topiladi","Elektr ozaro ta sir kuchini","Dielektr bilan maydon energiyasi necha marta zaiflanishini xarakterlaydi","Maydon energiya zichligini xarakterlaydi"],"correct":0},{"text":"Har birining qarshiligi 3 ? bo'lgan o'tkazgichlar ketma-ket ulansa, zanjirning umumiy qarshiligi nimaga teng?","options":["9 ?","6 ?","3 ?","12 ?"],"correct":0},{"text":"O'zgarmas tok deb nimaga aytiladi.","options":["O'zgarmas tok deb vaqt o'tishi bilan tokning yo'nalishi va kattaligi o'zgarmasa,","Vaqtning o'tishi bilan tokning yo'nalishi o'zgarib tursa,","Tok kuchining kattaligi birlik vaqtda o'zgarib tursa,","Kuchlanishning kattaligi vaqt bo'yicha o'zgarib tursa."],"correct":0},{"text":"Metallarda elektr toki qanday elektr zaryadlarning tartibli harakati tufayli hosil bo'ladi?","options":["erkin elektronlar","manfiy va musbat ionlar","elektron va musbat ionlar","musbat va manfiy ionlar hamda erkin elektronlar"],"correct":0},{"text":"O'tkazgichning elektr sig'imi deb nimaga aytiladi?","options":["jismning potensiallarini bir potensial birligiga oshirish uchun o'tkazgichga qancha zaryad berish kerakligini ko'rsatuvchi fizikaviy kattalik o'tkazgichning elektr sig'imi deyiladi","aylana shaklidagi o'tkazgich bo'ylab joylashgan zaryadlarning elektr maydon kuchlanganlik oqimi o'tkazgichning elektr sig'imi deyiladi","ma'lum l uzunlikka ega bo'lgan o'tkazgichning shu qismida joylashgan zaryadli zarrachalar potensiali o'tkazgichning elektr sig'imi deyiladi","to'g'ri shakldagi o'tkazgich bo'ylab joylashgan zaryadlarning elektr maydon kuchlanganlik oqimi o'tkazgichning elektr sig'imi deyiladi"],"correct":0},{"text":"Kondensator deb nimaga aytiladi?","options":["bir biridan dielektriklar bilan ajratilgan, miqdor jihatidan teng va qarama - qarshi ishorali zaryadlar bilan zaryadlangan ikkita o'tkazgich sistemasiga kondensator deb aytiladi","zaryadli yakkalangan o'tkazgichlar sistemasi kondensator deb aytiladi","bir biridan dielektriklar bilan ajratilgan, har xil miqdorga ega bo'lgan va neytral zaryadlar bilan zaryadlangan ikkita o'tkazgich sistemasiga kondensator deb aytiladi","neytral zaryadlangan ikkita plastinkadan tuzilgan va jami markazlari bir nuqtaga joylashgan sferadan iborat sistemaga kondensator deyiladi"],"correct":0},{"text":"O'ta o'kazuvchanlik hodisasi qanday fizik jarayon?","options":["Ma'lum haroratda o'tkazgich qarshiligining 0 ga teng bo'lishi;","Ma'lum bosim ostida o'tkazgichdagi tok kuchining 0 ga teng bo'lishi;","Ma'lum sharoitda o'tkazgich uchlaridagi potensial 0 ga ten bo'lishi;","O'tkazgichdagi tok quvvati 0 ga teng mo'lishi"],"correct":0},{"text":"Gazlarda elektr toki qanday elektr zaryadlarning tartibli harakati tufayli hosil bo'ladi?","options":["musbat va manfiy ionlar","faqat elektronlar","manfiy ionlar va elektronlar","faqat musbat ionlar"],"correct":0},{"text":"Ilgarilanma harakatda jismning ........","options":["barcha nuqtalari bir xil harakatlanadi","barcha nuqtalari bir burchakli t�zlikka ega bo'ladi","har qanday ikkita nuqta orasidagi masofa o'zgarmas bo'ladi va ularning siljishi turlicha bo'ladi.","og'irlik markazidan boshqa barcha nuqtalari bir tuslanishga ega bo'ladi"],"correct":0},{"text":"Jismni moddiy nuqta sifatida qarash uchun muayyan masala shartida uning ....... e'tiborga olish shart bo'lmasligi k�rak.","options":["o'lchamlarini","massasini","massasi va o'lchamlarini","en�rgiyasini"],"correct":0},{"text":"Sanoq sits�masini nimalar tashkil etadi?","options":["Sanoq jismi, koordinata sits�masi va vaqtni hisoblovchi asbob majmuasi","Koordinata sits�masi va vaqt","Koordinata sits�masi va sanoq jismi","Fazoviy koordinata sits�masi"],"correct":0},{"text":"Jismning ko'chishi uning .....","options":["datslabki holatdan boshqa holatga to'g'ri chiziq bo'ylab o'tishidir","datslabki holatdan chiqib yana shu holatga qaytib o'tishidir","har qanday harakatidir","yo'l bosishidir"],"correct":0},{"text":"Quyidagi javoblardan qaysidagi kattaliklar v�ktor kattaliklar emas?","options":["Massa, og'irlik, uzunlik","T�zlik, og'irlik kuchi, burchakli t�zlik, massa","Uzunlik, t�zlanish, impuls","In�rtsiya, massa, t�zlik, t�zlanish"],"correct":0},{"text":"Massa jismning ....... o'lchovi bo'lib u ......... yordamida o'lchanadi","options":["in�rtsiyasi, shaynli tarozi","in�rtsiyasi, osma tarozi","in�rtsiya mom�nti, dinamom�tr","d�formatsiyasi, pallali tarozi"],"correct":0},{"text":"Jismning og'irligi qachon og'irlik kuchidan katta bo'ladi?","options":["Jism a > 0 t�zlanish bilan yuqoriga ko'tarilayotganda","Jism a > 0 bilan pastga tushayotganda","� = 0 bo'lganda","� = g bo'lganda"],"correct":0},{"text":"O'rtacha t�zlik qachon oniy t�zlik bilan bir xil bo'ladi?","options":["Jismning t�kis harakatida","Jismning to'g'ri chiziqli t�zlanuvchan harakatida","Jismning t�branma harakatida","Jismni t�kis aylanma harakatida"],"correct":0},{"text":"Ko'chish va yo'l modullari qachon o'zaro t�ng bo'ladi?","options":["Jism bir tomonga to'g'ri chiziqli harakatlanganda.","Har qanday harakatda","Faqat egri chiziqli harakatda","To'g'ri javob yo'q"],"correct":0},{"text":"Burchak t�zlikni v�ktor kattalik bo'lib uning yo'nalishi ...... qoidasiga ko'ra topiladi","options":["Parma","O'ng qo'l","Chap qo'l","Vint"],"correct":0},{"text":"In�rtsial sanoq sist�masi d�b nimaga aytiladi?","options":["Nyuton qonunlari bajariladigan sanoq sit�masiga","Faqat �r bilan bog'liq sanoq sist�masiga","Quyosh bilan bog'liq sanoq sist�masiga","Maxsus nisbiylik printsipi bajariladigan sanoq sist�maga"],"correct":0},{"text":"Tabiatdagi o'zaro ta'sirlar qaysi javobda to'g'ri ko'rsatilgan?","options":["Gravitatsion, el�ktromagnit, yadroviy, kuchsiz","Gravitatsion, m�xanik, optik, yadroviy","M�xanik, issiqlik, el�ktromagnit, optik, yadroviy","M�xanik va el�ktromagnit"],"correct":0},{"text":"Jismning in�rtsiya markazi hamma vaqt uning ...... markazi bilan ......... tushadi.","options":["massa va og'irlik, ustma-ust","og'irlik, turli nuqtalar","massa, turli nuqtalarda","og'irlik, ......."],"correct":0},{"text":"Quyidagi jumlaning mazmuniga mos ravishda gapni davom ettiring.Tugri chizikli t�kis xarakatda t�zlanish v�ktori......","options":["0 ga t�ng","� > 0 moduli va yunalishi uzgarmaydi","� < 0 moduli va yunalishi uzgarmaydi","Moduli va yunalishi uzgarib turadi"],"correct":0},{"text":"Jism qaysi shart bajarilganda vaznsizlikka uchraydi?","options":["� = g","� > g","a < g","a = 2 g"],"correct":0},{"text":"Jismni erkin tushushi ................... harakatdir.","options":["t�kis t�zlanuvchan","t�kis s�kinlanuvchan","t�kis","s�kinlanuvchan"],"correct":0},{"text":"Gorizontga nisbatan burchak ostida otilgan jism eng uzoqqa �tib boradi?","options":["45^0","30^0","0^0","90^0"],"correct":0},{"text":"En�rgiya fizikaviy jihatdan jismlarning ... miqdori jihatdan ifodalovchi kattalikdir.","options":["ajarishi mumkin bo'lgan eng katta ishini","bajargan ishini","quvvatini","impulsini"],"correct":0},{"text":"Bir jism ok�an sathidan h chuqurlikdagi quduq tubida ikkinchi jism Buxoro shahri �r sirtidan h m�tr chuqurlikdagi quduq tubida joylashgan. Bu jismlarning qaysi birida pot�ntsial en�rgiya katta.","options":["2 - jismniki","ikkalasiniki bir xil","1 - jismniki","ikkalasida ham pot�ntsial en�rgiya yo'q"],"correct":0},{"text":"Jism lift bilan birga (-a) t�zlanish bilan harakatlanganmoqda. Bu harakat qanday va qayoqqa yo'nalgandir?","options":["Pastga, t�kis s�kinlanuvchan","Pastga, t�kis t�zlanuvchan","Yuqoriga, t�kis s�kunlanuvchan","Yuqoriga, t�kis t�zlanuvchan"],"correct":0},{"text":"Jismlarda ishqalanish kuchini sodir bo'lishiga sabab bo'luvchi faktorlarni b�lgilang.","options":["Sirtlarni g'adir - budir bo'lishi; nihoyatda silliq bo'lishi","Sirtlarni g'adir - budir bo'lishi; nihoyatda qizigan bo'lishi","Sirtlarni nihoyatda silliq bo'lishi; moylangan bo'lishi","Sirtlarni not�kis bo'lishi; sirtlarni el�ktrlangan bo'lishi"],"correct":0},{"text":"Quyosh sist�masida Mars bilan Quyosh orasidagi o'zaro ta'sir kuchi qaysi kuch toifasiga kiradi?","options":["gravitotsion ichki kuch","gravitatsion tashqi kuch","Koriolis kuchi","markazga intilma kuch"],"correct":0},{"text":"Kuch impulsi nima?","options":["Ta'sir kuchini ta'sir vaqtiga ko'paytmasi","Ta'sir kuchini ta'sir kuchiga nisbati","Ta'sir kuchiga t�zlik orttirishini ko'paytmasi","Ta'sir kuchiga t�zlik orttirilishi ko'paytmasi"],"correct":0},{"text":"Giroskop nima?","options":["O'zining birorta erkin o'qi atrofida juda t�z aylanuvchi simm�trik jism","O'z o'qi atrofida aylanuvchi har qanday jism","O'z o'qi atrofida aylanuvchi shar","O'z og'irlik markazi atrofida aylanuvchi kub. jism"],"correct":0},{"text":"Jismlarni noelastik urilishida kin�tik en�rgiya ............... en�rgiyaga aylanadi, chunki bunda jismni ....... uchun ish bajariladi","options":["ichki en�rgiyaga, d�formatsiyalash","ichki en�rgiyaga, qizitish","ichki en�rgiyaga, siljitish","pot�ntsial en�rgiyaga, ko'tarish"],"correct":0},{"text":"Sharlarning absolyut urilishida en�rgiya almashinuvi ......","options":["ro'y b�rmaydi","ro'y b�radi","1 - shardan 2- sharga ro'y b�radi","2 - shardan 1 - sharga ro'y b�radi"],"correct":0},{"text":"Qaysi javobda I, II, III kosmik t�zliklar ko'rsatilgan (km/s)","options":["7,9;11,2;16,7","7,9;9,8;11,2;","9,8;10,7;16","8;11;11,2"],"correct":0},{"text":"III kosmik t�zlikdan katta t�zlikda uchadigan jism ...","options":["Quyosh sist�masining tark etadi","Yer atrofida aylana bo'ylab t�z harakatlandi","Oy orqasidan aylanib o'tadi","Quyoshni orasidan aylanib o'tadi"],"correct":0},{"text":"Tinch turgan avtomobil 2 m/s^2 t�zlanish bilan harakatlanib 120 m masofani bosib o'tishi uchun qancha vaqt sarflaydi?","options":["11 s","18 s","16 s","30 s"],"correct":0},{"text":"Yer sirtida turgan jismga og'irlik kuchi qanday ta'sir etadi?","options":["statik","dinamik va statik","dinamik ham emas, statik ham emas","dinamik"],"correct":0},{"text":"Samolyot qanotini ko'taruvchi kuch nima hisobidan yuzaga k�ladi?","options":["qanot osti va ustidagi havo oqimi bosimlarining farqi","qanot osti va ustidagi havo yopishqoqligini turlicha bo'lishi","qanot ostida uyurma hosil qilinishi","qanot ustida uyurma hosil qilinishi"],"correct":0},{"text":"Bo'ylama to'lqinlar ............. muhitlarda yuzaga k�ladi.","options":["Qattiq, suyuq, gaz","Qattiq va suyuq","Gaz va suyuq","Faqat gaz"],"correct":0},{"text":"Ko'ndalang to'lqinlar d�b tarqalayotgan muhit zarralari to'lqinlarga aytiladi.","options":["To'lqinni tarqalish yo'nalishiga tik holda t�branadigan","To'lqinni tarqalish yo'nalishida t�branadigan","To'lqinni tarqalish yo'nalishiga burchak ostida t�branadigan","To'lqini tarqalish yo'nalishi rol o'ynamaydigan"],"correct":0},{"text":"Chastotasi 16 Hz gacha tovushlar ......... 20000 Hz dan katta tovushlar ........ tovushlar d�yiladi.","options":["infratovushlar, ultratovushlar","ultratovushlar, infratovushlar","ultratovushlar, tovushlar","infratovushlar, tovushlar"],"correct":0},{"text":"Bola Y�rda 160 N vaznli toshni ko'tara olsa, u oyda turib qancha vaznli va massali toshni ko'tara oladi?","options":["27 �, 16 ��","250, 27 ��","1600 �, 16 ��","160�, 16 ��"],"correct":0},{"text":"TU-154 samolyoti dvigat�ligining quvvati 24 000 kW, Mi - 10 v�rtolyotiniki esa 8000 kW. V�rtolyot dvigat�li n�cha s�kundda samolyotning bir s�kundda bajariladigan ishiga t�ng ish bajaradi.","options":["3","12","1","25"],"correct":0},{"text":"Energiyasi 2 kJ bo'lgan 10 kg massali jism ishqalanishsiz yo'lda qanday t�zlikda haraktlana oladi?","options":["20 �/�","15 �/�","0,2 �/�","9,8 �/�"],"correct":0},{"text":"Jismning elastikligi d�b nimaga aytiladi?","options":["Tashqi kuchlar ta'siri to'xtaganidan k�yin d�formatsiyalangan jismning shakli va o'lchamlarini tiklab olish qobiliyatiga","Tashqi kuchlar tasiri to'xtaganidan k�yin d�formatsiyalangan jismning faqat shaklini tiklay olish qobiliyatiga","Jismning tashqi kuchlar ta'siri to'xtaganidan k�yin ham ta'sirida egallagan shakli va o'lchamlarini saqlashga intilish xususiyatiga","Tashqi kuchlar ta'siridan jismning o'z shakli va o'lchamlarni o'zgartirishiga"],"correct":0},{"text":"Massasi 70 kg va hajmi 3?10^-2 m^3 bo'lgan tosh ko'l ostida yotibdi. Bu toshni suv sirtiga tortib chiqarish uchun qanday kuch talab qilinadi?","options":["40 N","400 �N","40 �N","400 N"],"correct":0},{"text":"Tosh yuqoriga v�rtikal otildi. Tosh tra�ktoriyaning qaysi nuqtalarida eng katta t�zlanishga ega bo'ladi? Havoning qarshiligi hisobga olinmasin","options":["T�zlanish xamma joyda birday va g ga t�ng","Tra�ktoriyaning urtasida","Tra�ktoriyaning eng kuyi nuktasida","Tra�ktoriyaning eng yukori nuktasida"],"correct":0},{"text":"Suyuqlikka bir vaqtning o'zida bir xil massali, l�kin R va 2R radiusli sharchalar tashlandi. Sharchalarning suyuqlik ichida harakatlanish t�zliklarining nisbati nimaga t�ng?","options":["2","1","3","4"],"correct":0},{"text":"Harakatlanayotgan suyuqlik ichidagi gidrodinamik bosim suyuqlik oqimining t�zligiga bog'liqmi? Bog'liq bo'lsa qanday?","options":["Ha. Suyuqlikning oqim t�zligi katta joyda bosim kichik bo'ladi va aksincha","Yo'q. Suyuqlikning bosimi t�zlikka bog'liq emas","Ha. Suyuqlikning oqim t�zligi katta joyda bosim ham katta bo'ladi va aksincha","Ha. Suyuqlikning oqim t�zligi kichik joyda bosim ham kichik bo'ladi va aksincha"],"correct":0},{"text":"Radiusi 2 m aylana bo'ylab harakatlanayotgan moddiy nuqta 3,14 s ichida aylananing yarmini bosib o'tdi. Moddiy nuqtaning chiziqiy t�zligi aniqlansin (m/s).","options":["4","2","3,14","6,28"],"correct":0},{"text":"SI birliklar sist�masidagi asosiy o'lchov birliklarini ko'rsating.","options":["S�kund, kilogramm, m�tr, Amp�r, K�lvin, kand�la, mol","M�tr, soat, kilogramm, Amp�r, gradus, kand�la, mol","Santim�tr, s�kund, kilogramm, Volt, kand�la, mol","S�kund, kilogramm, m�tr, Nyuton, bosim, mol"],"correct":0},{"text":"kg massali jismga 200 N kuch ta'sir etmoqda. Bu kuch ta'sirida jism qanday tezlanish oladi?","options":["20 m/s^2","1,5 m/s^2","1 m/s^2","2,5 m/s^2"],"correct":0},{"text":"Shamol havo sharini janub tomon olib ketmoqda. Bunda shar ustiga o'rnatilgan bayroqcha qaysi tomonga hilpiraydi?","options":["hilpiramaydi","shimolga","sharqqa","g'arbga"],"correct":0},{"text":"Quyidagi fikrlarning qaysi biri noto'g'ri?","options":["harakatlanish vaqtini topish uchun o'rtacha tezlikni bosib o'tilgan yo'lga bo'lish kerak.","agar jism biror sanoq sistemaga nisbatan tinch turgan bo'lsa, uning bu sistemaga nisbatan tezligi nolga teng bo'ladi","tekis harakatda tezlikning son qiymatl o'zgarmas kattalikdir.","harakatning o'rtacha tezligini topish uchun bosib o'tilgan yo'lni harakatlanlsh vaqtiga bo'lish kerak"],"correct":0},{"text":"Samolyotning qo'nishdagi tezligi 108 km/h va qo'nishda bosadigan yo'li 450 m bo'lsa, u necha sekundda to'xtaydi?","options":["30","26","32","35"],"correct":0},{"text":"Tinch turgan jism o'zgarmas tezlanish bilan harakat boshlab, uchinchi sekundda 5 m yo'l bosdi. U dastlabki 3 sekundda necha metr yo'l o'tgan?","options":["9","13","15","11"],"correct":0},{"text":"Modda zichligini aniqlash uchun, uning ...","options":["massasini hajmiga bo'lish kerak","hajmini massasiga bo'lish kerak","massasini hajmiga ko' paytirish kerak.","og'irligini hajmiga bo'lish kerak."],"correct":0},{"text":"Suv bilan to'ldirilib, zich berkitilgan shisha idishda havo pufakchasi bor.Qanday haroratda pufakcha- ning o'lchami eng katta bo'ladi? Idish hajmining temperaturaviy o'zgarishi hisobga olinmasin.","options":["4�C","15�C","20�C","0�C"],"correct":0},{"text":"Nyutonning 2-qonuniga berilgan to'g'ri ta'rifni ko'rsating.","options":["jism olgan tezlanish unga ta'sir etuvchi natijaviy kuch yo'nalishida bo'lib, moduli kuchning moduliga to'g'ri va jism massasiga teskari mutanosibdir","jismga ta'sir etuvchi har qanday kuch shu jism massasi bilan to'la tezlanishining ko'paytmasiga teng.","jismga ta'sir etuvchi kuch jism massasiga to'g'ri mutanosib va mutanosiblik koeffitsiyenti tezlanishdir.","jismning tezlanishi unga ta'sir etuvchi har bir kuchga mutanosibdir."],"correct":0},{"text":"Kuch birligi 1 N ni ta'riflang.","options":["1 kg massali jismga 1 m/s^2 tezlanish beruvchi kuch.","1 kg massali jismni 1 m ga ko'chiruvchi kuch.","1 kg massali jismni tekis harakatlantiruvchi kuch.","10 kg massali jismga 1 m/s^2 tezlanish beruvchi kuch."],"correct":0},{"text":"Massasi M bo'lgan jism gorizontal tekislikda tinch turibdi. Bu holatda jism hosil qiladigan bosim kuchi bilan tayanch reaksiyasi kuchining modul jihatdan tengligi quyida sanab o'tilgan qonunlarning qaysi bin asosida tushuntiriladi?","options":["Nyutonning 3-qonuni.","impulsning saqlanish qonuni.","Nyutonning 2-qonuni.","Nyutonning 1-qonuni."],"correct":0},{"text":"Uchib ketayotgan raketadan har sekundda 20 kg gaz 450 m/s tezlik bilan chiqayotgan bo'lsa, reaktiv kuch qanday bo'ladi (kN)?","options":["9","12","4","6"],"correct":0},{"text":"mol BXS da qaysi kattalikning birligidir?","options":["modda miqdori","massa","hajm.","molyar massa"],"correct":0},{"text":"Zaryadning saqlanish qonuniga berilgan eng to'g'ri va to'la ta'rifni toping.","options":["atrof muhit bilan zaryad almashmaydigan tizimlardagi zaryadlarning algebraik yig'indisi o'zgarmaydi.","atrof muhitdan ajratilgan tizimda barcha zarralar zaryadlari modullarining yig'indisi o'zgarmaydi.","atrof muhitdan issiqlik o'tkazmaydigan qalin to'siq bilan ajratilgan zaryadlar tizimidagi zaryadlar yig'indisi vaqt davomida o'zgarmaydi.","har qanday zaryadlar tizimidagi zaryadlar yig'indisi o'zgarmaydi."],"correct":0},{"text":"Qutbli molekulalardan tuzilgan dielektrik bir jinsli elektr maydonga kiritilsa, nima bo'ladi?","options":["dipollar asosan maydon yo'nalishida joylashadi.","dipollar maydon bo'ylab siljiydi.","dipollar maydonga qarshi yo'nalishda siljiydi.","hech narsa bo'lmaydi."],"correct":0},{"text":"Agar zaryadgacha bo'lgan masofa 3 marta oshirilsa, nuqtaviy zaryad maydoni kuchlanganligi qanday o'zgaradi?","options":["9 marta kamayadi","3 marta kamayadi","9 marta katlalashadi","3 marta katlalashadi"],"correct":0},{"text":"Tekis zaryadlangan cheksiz tekislikdan 1 m masofadagi 1 nC zaryadga 4 mN kuch ta'sir etadi. Agar bu masofa 2 m gacha oshiritsa, shu zaryadga qanday kuch (mN) ta'sir etadi?","options":["4","2","1","0.5"],"correct":0},{"text":"Zaryadlangan o'tkazgich sirtidagi nuqtalarda elektr maydonningkuchlanganlik chiziqlari qanday yo'nalgan bo'ladi?","options":["sirtga tik ravishda","sirtga urinma ravishda","sirtga ixtiyoriy burchak ostida","TJY"],"correct":0},{"text":"Teng zaryadlar bilan zaryadlangan 1000 ta bir xil suv tomchilari qo'shilib, katta sferik tomchiga aylandi. Bu tomchining potensiali kichik tomchining potensialidan necha marta katta bo'ladi?","options":["100","5","10","50"],"correct":0},{"text":"Zaryadlangan kondensator qoplamalari sim bilan tutashtirilib, zaryadsizlantirildi. Bunda qoplamalar massasi qanday o'zgaradi?","options":["musbat zaryadlangan qoplama massasi ortib, manfiy zaryadlangan qoplama massasi kamayadi.","har ikkala qoplamaning massasi ortadi.","har ikkala qoplamaning massasida o'zgarish bo'lmaydi.","har ikkala qoplamaning massasi ortadi."],"correct":0},{"text":"Elektr maydonning energiya zichligi ifodasini ko'rsating.","options":["??0�^2 /V","??0U^2 /2","??0�^2 /2","??0�^2 V"],"correct":0},{"text":"Zaryadlangan kondensatorni manbadan uzib, plastinalari orasidagi masofa 2 marta kamaytirilsa, kuch-lanishi qanday o'zgaradi?","options":["2 marta kamayadi","4 marta kamayadi","4 marta ortadi","2 marta ortadi"],"correct":0},{"text":"Tok zichligi deb nimaga aytiladi? Tok zichligi deb,","options":["o'tkazgich ko'ndalang kesimi yuza birligidan vaqt birligida o'tuvchi ... zaryadga miqdor jihatdan teng bo'lgan vektor kattalikka aytiladi.","o'tkazgichning ko'ndalang kesimi yuza birligidan o'tuvchi...C) o'tkazgich bo'ylab vaqt birligi ichida siljigan","o'tkazgichning ko'ndalang kesimidan vaqt birligi ichida o'tuvchi","o'tkazgich bo'ylab vaqt birligi ichida siljigan"],"correct":0},{"text":"Elektr yurituvchi kuch deb nimaga aytiladi?","options":["birlik musbat zaryadni zanjir bo'ylab ko'chirishda chet kuchlarning bajargan ishiga miqdor jihatdan teng bo'lgan fizik kattalikka aytiladi.","elektronni yopiq zanjir bo'ylab ko'chirishda chet kuchlarning bajargan ishiga miqdor jihatdan teng bo'lgan fizik kattalikka aytiladi.","zaryadlarni yopiq zanjir bo'ylab ko'chi-rishda chet kuchlarning bajargan ishiga miqdor jihatdan teng bo'lgan fizik kattalikka aytiladi.","musbat zaryadlarni yopiq zanjir bo'ylab ko'chirishda chet kuchlarning ... ... bajargan ishiga miqdor jihatdan teng bo'lgan fizik kattalikka aytiladi."],"correct":0},{"text":"Tok manbai ichidagi chet kuchlar 3 � zaryadni elektrostatik kuchlarga qarshi yo'nalishda ko'chirishda 150 J ish bajaradi. Tok manbaining EYKi qanday (V)","options":["50","400","500","40"],"correct":0},{"text":"Tok manbai ichidagi chet kuchlar 50 � zaryadni elektrostatik kuchlarga qarshi yo'nalishda ko'chirishda 400 J ish bajaradi. Tok manbaining EYKi qanday (V)","options":["8","40","80","20"],"correct":0},{"text":"Energiyaning 1 kilovatt�soat degan birligi necha joulga teng?","options":["3600000","36000","360","100000"],"correct":0},{"text":"Energiyaning 2 kilovatt�soat degan birligi necha joulga teng?","options":["7200000","72000","720","100000"],"correct":0},{"text":"Elektr toki zanjirning biror qismida 3 s da 6 J ish bajaradi. Agar zanjir qismidagi kuchlanish 2V bo'lsa, undan olayotgan tokning kuchi qanday (A)?","options":["1","4","9","10"],"correct":0},{"text":"Elektr toki zanjirning biror qismida 9 s da 18 J ish bajaradi. Agar zanjir qismidagi kuchlanish 2V bo'lsa, undan olayotgan tokning kuchi qanday (A)?","options":["1","4","9","10"],"correct":0},{"text":"Elektr toki zanjirning biror qismida 10 s da 30 J ish bajaradi. Agar zanjir qismidagi kuchlanish 3V bo'lsa, undan olayotgan tokning kuchi qanday (A)?","options":["1","4","9","10"],"correct":0},{"text":"Xonaga o'rnatilgan ventilyatorning quvvati 36 W. Uning 20 s da bajargan ishi qanday (J)?","options":["720","72","18","10"],"correct":0},{"text":"Xonaga o'rnatilgan ventilyatorning quvvati 10 W. Uning 20 s da bajargan ishi qanday (J)?","options":["200","20","180","10"],"correct":0},{"text":"Xonaga o'rnatilgan ventilyatorning quvvati 20 W. Uning 20 s da bajargan ishi qanday (J)?","options":["400","40","50","60"],"correct":0},{"text":"Kuchlanish o'zgarmagani holda elektr qarshilik 2 marta kamaysa, tokning quvvati qanday o'zgaradi?","options":["2 marta ortadi.","4 marta kamayadi.","2 marta kamayadi.","o'zgarmaydi."],"correct":0},{"text":"Garmonik tebranishning amplitudasi 2 marta ortib, chastotasi 2 marta kamaysa, uning to'liq energiyasi qanday o'zgaradi?","options":["o'zgarmaydi.","2 marta ortadi.","4 marta ortadi.","4 marta kamayadi"],"correct":0},{"text":"Bir tebranish davri davomida matematik mayatnikning potensial energiyasi necha marta kinetik energiyaga aylanadi?","options":["2","4","3","1"],"correct":0},{"text":"Tovush qattiqligi uning qaysi parametriga bog'liq?","options":["amplituda.","chastota.","to'lqin uzunligi.","tezlik."],"correct":0},{"text":"Tovush tezligi quyidagi omillarning qaysi biri bilan aniqlanadi?","options":["muhitning xossalari bilan.","tebranishlar chastotasi bilan.","to'lqin amplitudasi bilan.","to'lqin uzunligi bilan."],"correct":0},{"text":"Tovush havodan suvga o'tganda, qaysi kattalik o'zgarmaydi?","options":["chastota","tezlik.","chastota va to'lqin uzunligi.","to'lqin uzunligi."],"correct":0},{"text":"Qanday tovushlar ultratovushlar hisoblanadi?","options":["chastotasi 20000 Hz dan katta bo'lgan.","chastotasi 20 Hz dan 20000 Hz gacha bo'lgan","chastotasi 20 Hz dan kichik bo'lgan","chastotasi 200 Hz dan kichik bo'lgan."],"correct":0},{"text":"Garmonik tebranayotgan jismning to'la energiyasi vaqt o'tishi bilan","options":["o'zgarmas saqlanadi","sinus yoki kosinus qonuniga binoan o'zgaradi","orta boradi","kamaya boradi."],"correct":0},{"text":"Konveksiya deb qanday fizik jarayonga aytiladi?","options":["notekis isitilgan suyuqlik yoki gaz qatlamlarining og'irlik kuchi ta'sirida sodir bo'ladigan issiqlik almashuvi.","notekis isitilgan suyuqlik yoki gaz qatlamlarining nurlanish yo'li bilan issiqlik almashuvi.","moddaning suyuq holatdan gaz holatiga o'tishi.","issiqlik almashish vaqtida ichki energiyaning o'zgarishi."],"correct":0},{"text":"mol ideal gaz izoxorik ravishda 2 � ga isitilganda bajarilgan ishni toping (J).","options":["0","16,8","8,31","4"],"correct":0},{"text":"Termqdinamikaning birinchi qonuni - issiqlik jarayonlarida ... ning qo'llanishidir.","options":["energiyaning saqlanish qonuni.","impulsning saqlanish qonuni.","Mendeleev-Klapeyron tenglamasi.","Boyl-Mariotl qonuni."],"correct":0},{"text":"Quyida keltirilgan munosabatlarning qaysi biri faqat izotermik jarayon uchun o'rinli?","options":["Q=A.","Q=?U","Q=?U+A.","?U=A."],"correct":0},{"text":"kg massali jismga 20 N kuch ta'sir etmoqda. Bu kuch ta'sirida jism qanday tezlanish oladi?","options":["4 m/s^2","1,5 m/s^2","1 m/s^2","6,5 m/s^2"],"correct":0},{"text":"kg massali jismga 20 N kuch ta'sir etmoqda. Bu kuch ta'sirida jism qanday tezlanish oladi?","options":["1 m/s^2","1,5 m/s^2","2 m/s^2","6,5 m/s^2"],"correct":0},{"text":"mol ideal gaz izoxorik ravishda 4 � ga isitilganda bajarilgan ishni toping (J).","options":["0","16,8","8,31","4"],"correct":0},{"text":"Tok manbai ichidagi chet kuchlar 5 � zaryadni elektrostatik kuchlarga qarshi yo'nalishda ko'chirishda 150 J ish bajaradi. Tok manbaining EYKi qanday (V)","options":["30","400","500","40"],"correct":0},{"text":"Tok manbai ichidagi chet kuchlar 100 � zaryadni elektrostatik kuchlarga qarshi yo'nalishda ko'chirishda 400 J ish bajaradi. Tok manbaining EYKi qanday (V)","options":["4","40","80","20"],"correct":0},{"text":"Energiyaning 2 kilovatt�soat degan birligi necha joulga teng?","options":["7200000","36000","360","100000"],"correct":0},{"text":"Energiyaning 4 kilovatt�soat degan birligi necha joulga teng?","options":["14400000","72000","720","100000"],"correct":0},{"text":"Elektr toki zanjirning biror qismida 3 s da 12 J ish bajaradi. Agar zanjir qismidagi kuchlanish 2V bo'lsa, undan olayotgan tokning kuchi qanday (A)?","options":["2","4","9","10"],"correct":0},{"text":"Elektr toki zanjirning biror qismida 9 s da 36 J ish bajaradi. Agar zanjir qismidagi kuchlanish 2V bo'lsa, undan olayotgan tokning kuchi qanday (A)?","options":["2","4","9","10"],"correct":0},{"text":"Xonaga o'rnatilgan ventilyatorning quvvati 36 W. Uning 10 s da bajargan ishi qanday (J)?","options":["360","72","18","800"],"correct":0},{"text":"Kuchlanish o'zgarmagani holda elektr qarshilik 4 marta kamaysa, tokning quvvati qanday o'zgaradi?","options":["4 marta ortadi.","8 marta kamayadi.","2 marta kamayadi.","o'zgarmaydi."],"correct":0},{"text":"Garmonik tebranishning amplitudasi 4 marta ortib, chastotasi 4 marta kamaysa, uning to'liq energiyasi qanday o'zgaradi?","options":["o'zgarmaydi.","2 marta ortadi.","4 marta ortadi.","4 marta kamayadi"],"correct":0},{"text":"Broun harakati nima?","options":["Molekulalarning tartibsiz va to`xtovsiz harakati.","Qizigan havo molekulalarining yer sirtidan yuqoriga ko`tarilishi.","Atmosfera issiq va sovuq havo oqimlarining hosil bo`lishi.","Molekulalarning harakati"],"correct":0},{"text":"Mexanik harakat deb qanday harakatga aytiladi?","options":["Jism vaziyatining boshqa jismga nisbatan o`zgarishiga","Jismning istalgan paytidagi vaziyatini aniqlashga","Jismning ikki nuqtasi orasidagi vaziyatining o`zgarishiga","Jism harakatlanganda chizgan chizig`iga"],"correct":0},{"text":"Qanday suyuqlik qattiq holatga o`tganda boshqacha nom oladi?","options":["Suv","Yog`","Spirt","Sut"],"correct":0},{"text":"Diffuziya tezligi nimaga bog`liq?","options":["Haroratiga","Moddaning turiga","Holatiga","Hajmiga"],"correct":0},{"text":"Suv molekulasi nechta atomdan tashkil topgan?","options":["3ta","2ta","4ta","1 ta"],"correct":0},{"text":"Arximed kuchi formulasini ko`rsating.","options":["F= pvg","F=mg","F=A/S","F=pS"],"correct":0},{"text":"Jism yuqoriga harakatlanmoqda qaysi energiyasi ortadi.","options":["Potensial energiya","Kinetik energiya.","To'la energiya","Quvvat."],"correct":0},{"text":"Jism impulsi deb nimaga aytiladi?","options":["Jism massasining tezlikka ko`paytmasiga","Ta'sir etuvchi kuchning vaqtga ko'paytmasiga","Ta'sir etuvchi kuchning massasiga nisbatiga","Jism massasi bilan ta'sir etuvchi kuch ko`paytmasiga"],"correct":0},{"text":"Quyidagi jismlarning qaysi biri kenetik energiyaga ega bo`ladi?","options":["Yerdan ko'tarilgan tosh","Yerda turgan jism","Kamondan o'tganda tarang tortilgan kamon ipi","Dars tayyorlab o`tirgan o`quvchi."],"correct":0},{"text":"Jismning tezlanishi ikki marta ortsa, unga ta'sir etayotgan kuch qanday o'zgaradi?","options":["2 marta ortadi","2 marta kamayadi","o'zgarmaydi","4 marta ortadi"],"correct":0},{"text":"Jism massasi uning olgan tezlanishiga qanday bog`liq?","options":["teskari proporsional","to`g`ri proporsional","bog`liq emas","kuchga bog`liq"],"correct":0},{"text":"Tezlik deb nimaga aytiladi.","options":["Vaqt birligi ichida bosib o'tilgan yo'lga.","Jismning harakat trayektoryasi uzunligiga.","To'g'ri javob yo'q.","Traektoriya uzunligiga"],"correct":0},{"text":"Ko`chish f�rmul�sini ko`rs�ting?","options":["s = vt","V=s/t","V = V0 + at","a=(v-vo)/t"],"correct":0},{"text":"T�zl�nish f�rmul�sini ko`rs�ting?","options":["a=(v-vo)/t","V=s/t","V=Vo+at","S = v . t"],"correct":0},{"text":"Yuza birligiga tik ravishda qo'yilgan kuchga to'g'ri keladigan fizik kattalikka ... deyiladi.","options":["Bosim","Kuch","Tezlik","Tezlanish"],"correct":0},{"text":"Bosimni kamaytirish uchun yuzani....","options":["kattalashtiriladi","kichiklashtiriladi","tenglashtiriladi","t.j.yoq"],"correct":0}];
+(function init() {
+  const existing = loadQuestions();
+  if (existing.length === 0) {
+    saveQuestions(SEED_QUESTIONS);
+  }
+  showHome();
+})();
+</script>
+</body>
+</html>
